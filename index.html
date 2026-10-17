@@ -1,0 +1,2277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bulk Deal Decoder</title>
+<style>
+:root{--bg:#0b0f14;--p:#131a22;--p2:#0f151c;--bd:#1e2833;--tx:#e6edf3;--mu:#8b98a5;
+--g:#16c784;--gb:#0e2e22;--r:#ea3943;--rb:#2e1216;--a:#f0b90b;--ab:#2e2610;
+--b:#3b82f6;--bb:#0f1f38;--pu:#a855f7}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--tx);font-family:'Segoe UI',Roboto,sans-serif;font-size:14px;line-height:1.5;min-height:100vh}
+.c{max-width:1800px;margin:0 auto;padding:24px}
+header{display:flex;justify-content:space-between;align-items:center;padding-bottom:16px;border-bottom:1px solid var(--bd);margin-bottom:24px;flex-wrap:wrap;gap:12px}
+h1{font-size:20px;font-weight:600}
+h1 span{background:linear-gradient(90deg,#16c784,#3b82f6);-webkit-background-clip:text;background-clip:text;color:transparent}
+.bd{font-size:11px;padding:3px 8px;border-radius:4px;background:var(--bb);color:var(--b);font-weight:600}
+.btn{padding:7px 14px;border-radius:6px;font-size:12px;font-weight:600;border:1px solid var(--bd);background:var(--p);color:var(--tx);cursor:pointer;font-family:inherit}
+.btn:hover{border-color:var(--b);color:var(--b)}
+.uz{border:2px dashed var(--bd);border-radius:12px;padding:32px 20px;text-align:center;background:var(--p2);margin-bottom:16px}
+.uz.dg{border-color:var(--g);background:var(--gb)}
+.uz h3{font-size:16px;font-weight:600;margin-bottom:8px}
+.uz p{font-size:12px;color:var(--mu);margin-bottom:20px}
+.uz input[type=file]{background:var(--p);color:var(--tx);border:2px solid var(--g);border-radius:8px;padding:12px 16px;font-family:inherit;font-size:14px;cursor:pointer;font-weight:600;max-width:100%}
+.uz input[type=file]::file-selector-button{background:var(--g);color:#0b0f14;border:none;padding:8px 16px;border-radius:6px;margin-right:12px;font-weight:700;cursor:pointer;font-family:inherit;font-size:13px}
+.dbg{background:#0a0e13;border:2px solid var(--b);border-radius:8px;padding:12px 16px;margin-bottom:20px;display:none}
+.dbg.show{display:block}
+.dbg-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-weight:700;color:var(--b);text-transform:uppercase;letter-spacing:.5px;font-size:11px}
+.dbg-hd button{background:transparent;border:1px solid var(--bd);color:var(--mu);padding:2px 10px;border-radius:4px;cursor:pointer;font-size:11px;font-family:inherit}
+#dbgBody{font-family:Consolas,Monaco,monospace;font-size:12px;max-height:220px;overflow-y:auto}
+.dl{color:#8b98a5;line-height:1.6;padding:2px 0}
+.dl.i{color:#60a5fa}.dl.o{color:#4ade80}.dl.w{color:#facc15}.dl.e{color:#f87171;font-weight:700}
+.dl .ts{color:#3d4d5d;margin-right:8px}
+.dbg-fab{position:fixed;bottom:20px;right:20px;z-index:500;width:44px;height:44px;border-radius:50%;background:var(--p);border:2px solid var(--b);color:var(--b);cursor:pointer;font-size:18px;font-family:inherit;box-shadow:0 4px 12px rgba(0,0,0,.4);transition:.15s}
+.dbg-fab:hover{background:var(--b);color:#fff}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:24px}
+.st{background:var(--p);border:1px solid var(--bd);border-radius:10px;padding:14px}
+.st.clk{cursor:pointer;transition:.15s;user-select:none;position:relative}
+.st.clk:hover{border-color:var(--b);transform:translateY(-1px);box-shadow:0 4px 14px rgba(59,130,246,.15)}
+.st.clk::after{content:'→';position:absolute;right:14px;top:14px;color:var(--mu);font-size:14px;opacity:.6;transition:.15s}
+.st.clk:hover::after{color:var(--b);opacity:1;transform:translateX(2px)}
+.st-l{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.st-v{font-size:22px;font-weight:700}
+.st-v.g{color:var(--g)}.st-v.r{color:var(--r)}.st-v.b{color:var(--b)}
+.tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--bd);overflow-x:auto}
+.tab{padding:10px 16px;cursor:pointer;font-size:13px;font-weight:500;color:var(--mu);border-bottom:2px solid transparent;white-space:nowrap}
+.tab:hover{color:var(--tx)}
+.tab.on{color:var(--tx);border-bottom-color:var(--g)}
+.pnl{display:none}.pnl.on{display:block}
+.ct{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.ct input,.ct select,.ct button{background:var(--p);border:1px solid var(--bd);color:var(--tx);padding:8px 12px;border-radius:6px;font-size:13px;font-family:inherit;outline:none}
+.ct input:focus,.ct select:focus{border-color:var(--b)}
+.ct input{flex:1;min-width:200px}
+.ct button{cursor:pointer}
+.hlp{background:linear-gradient(90deg,rgba(59,130,246,.08),rgba(22,199,132,.04));border:1px solid rgba(59,130,246,.25);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12px;line-height:1.6}
+.hlp strong{color:var(--b)}
+.fs{background:var(--p);border:1px solid var(--bd);border-radius:10px;padding:12px 16px;margin-bottom:10px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.afb{background:var(--p);border:1px dashed var(--b);border-radius:10px;padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12px}
+.afb.em{display:none}
+.afl{color:var(--b);font-weight:700;text-transform:uppercase;letter-spacing:.5px;font-size:11px}
+.afp{display:inline-flex;align-items:center;gap:6px;padding:4px 6px 4px 10px;background:var(--bb);color:var(--b);border:1px solid rgba(59,130,246,.3);border-radius:14px;font-size:11px;font-weight:600}
+.afp .rm{cursor:pointer;font-size:14px;line-height:1;padding:0 4px}
+.afp .rm:hover{color:var(--r)}
+.clr{padding:4px 12px;background:transparent;border:1px solid var(--r);color:var(--r);border-radius:14px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;margin-left:auto}
+.ltp{background:var(--p);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:16px}
+.ltp h4{font-size:13px;font-weight:600;margin-bottom:4px}
+.ltp p{font-size:11px;color:var(--mu);margin-bottom:10px}
+.ltp .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ltp label{display:block;font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.3px;margin-bottom:4px;font-weight:600}
+.ltp textarea{width:100%;min-height:60px;background:var(--p2);border:1px solid var(--bd);color:var(--tx);border-radius:6px;padding:8px 10px;font-family:monospace;font-size:12px;outline:none;resize:vertical}
+.ltp textarea:focus{border-color:var(--b)}
+.ltp .acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.ltp .acts button{padding:6px 12px;font-size:12px;background:var(--bb);color:var(--b);border:1px solid var(--b);border-radius:6px;cursor:pointer;font-weight:600;font-family:inherit}
+.ltp .acts button:hover{background:var(--b);color:#fff}
+.ltp .acts button.gh{background:transparent;color:var(--mu);border-color:var(--bd)}
+.ltp .acts button.gr{background:var(--gb);color:var(--g);border-color:var(--g)}
+.ltp .acts button.am{background:var(--ab);color:var(--a);border-color:var(--a)}
+table{width:100%;border-collapse:collapse;background:var(--p);border-radius:10px;overflow:hidden;font-size:13px}
+th{text-align:left;padding:10px 10px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--mu);background:var(--p2);border-bottom:1px solid var(--bd);cursor:pointer;white-space:nowrap;position:relative;user-select:none}
+th:hover{color:var(--tx)}
+th.help{cursor:help}
+th.help::before{content:'ⓘ';position:absolute;left:2px;top:50%;transform:translateY(-50%);font-size:8px;opacity:.4;color:var(--b)}
+th.so::after{content:'⇅';position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;opacity:.3}
+th.sa::after{content:'▲';opacity:1;color:var(--b)}
+th.sd::after{content:'▼';opacity:1;color:var(--b)}
+th.ca{color:var(--b);background:var(--bb)}
+th.ns{cursor:default}
+th.ns::after{content:''}
+td{padding:10px 10px;border-bottom:1px solid var(--bd);vertical-align:top}
+tr:hover{background:rgba(255,255,255,.02)}
+tr.kn{background:rgba(251,146,60,.04)}
+tr.cr{background:rgba(234,57,67,.06)}
+.sym{font-weight:700;color:var(--b);cursor:pointer}
+.sym:hover{color:#60a5fa}
+.sym-n{font-size:11px;color:var(--mu)}
+.clk{color:var(--tx);cursor:pointer}
+.clk:hover{color:var(--b)}
+.tag{display:inline-block;font-size:10px;padding:2px 6px;border-radius:4px;font-weight:600;margin-left:4px}
+.tag.dii{background:var(--bb);color:#60a5fa}
+.tag.fii{background:var(--pu);color:#fff}
+.tag.ins{background:var(--ab);color:var(--a)}
+.tag.sov{background:#3b1f5e;color:#c084fc}
+.tag.pension{background:#1e3a2e;color:#4ade80}
+.tag.fund{background:#252019;color:#d4a373}
+.tag.other{background:#252019;color:#d4a373}
+.p{color:var(--g);font-weight:600}
+.n{color:var(--r);font-weight:600}
+.mu{color:var(--mu)}
+.dash{display:inline-block;cursor:help;color:var(--mu);opacity:.6;border-bottom:1px dotted var(--mu);padding:0 2px}
+.dash:hover{opacity:1;color:var(--tx)}
+.sell-vwap{color:var(--r);font-weight:600}
+.sp{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:14px;cursor:pointer}
+.sp.bull{background:var(--gb);color:var(--g);border:1px solid rgba(22,199,132,.3)}
+.sp.bear{background:var(--rb);color:var(--r);border:1px solid rgba(234,57,67,.3)}
+.sp.mx{background:var(--ab);color:var(--a);border:1px solid rgba(240,185,11,.3)}
+.sp.w{box-shadow:0 0 0 1px var(--r)}
+.wb{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:16px;font-size:11px;font-weight:700;background:var(--p2);border:1px solid var(--bd);color:var(--mu);cursor:pointer;font-family:inherit}
+.wb:hover{border-color:var(--a);color:var(--a)}
+.wb.on{background:var(--ab);border-color:var(--a);color:var(--a)}
+.li,.di{background:var(--p2);border:1px solid var(--bd);color:var(--tx);padding:5px 8px;border-radius:5px;font-size:12px;width:80px;text-align:right;outline:none;font-family:inherit}
+.di{width:72px}
+.li:focus,.di:focus{border-color:var(--b)}
+.li.f{border-color:rgba(59,130,246,.4);color:var(--b);font-weight:600}
+.di.u{border-color:rgba(22,199,132,.5);color:var(--g);font-weight:600}
+.di.d{border-color:rgba(234,57,67,.5);color:var(--r);font-weight:600}
+.di.c{border-color:var(--r);background:rgba(234,57,67,.08);color:#f87171;font-weight:800}
+.rp{display:inline-block;font-size:12px;font-weight:700;padding:3px 8px;border-radius:5px}
+.rp.u{background:var(--gb);color:var(--g)}
+.rp.d{background:var(--rb);color:var(--r)}
+.dp{display:inline-block;font-size:11px;font-weight:600;padding:2px 7px;border-radius:10px;background:var(--p2);color:var(--mu)}
+.dp.f{background:var(--bb);color:var(--b)}
+.dp.o{background:#2e2610;color:var(--a)}
+.fl{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;border:1px solid transparent;white-space:nowrap;margin:1px;cursor:help}
+.fl.repeat{background:#3d1e0e;color:#fb923c;border-color:rgba(251,146,60,.3)}
+.fl.consensus{background:#1a2e1e;color:#86efac;border-color:rgba(134,239,172,.3)}
+.fl.aggressive{background:#2e1e3d;color:#c084fc;border-color:rgba(192,132,252,.3)}
+.fl.chasing{background:#3d2e0e;color:#fbbf24;border-color:rgba(251,191,36,.3)}
+.fl.averaging{background:#1e2e3d;color:#60a5fa;border-color:rgba(96,165,250,.3)}
+.fl.fresh{background:#0e2e22;color:#4ade80;border-color:rgba(74,222,128,.3)}
+.fl.cooling{background:#2e1216;color:#f87171;border-color:rgba(248,113,113,.3)}
+.fl.mixed{background:#2e2610;color:#facc15;border-color:rgba(250,204,21,.3)}
+.fl.knife{background:#3d1e0e;color:#fb923c;border-color:#fb923c;font-weight:800}
+.fl.crash{background:#4a0e14;color:#ff8080;border-color:#ea3943;font-weight:800}
+.fl.squeeze{background:#1a2e1e;color:#86efac;border-color:#16c784}
+.sect{display:inline-block;font-size:10px;padding:1px 6px;border-radius:3px;background:var(--p2);color:var(--mu);border:1px solid var(--bd);cursor:help}
+.cb{background:linear-gradient(90deg,rgba(234,57,67,.15),rgba(234,57,67,.05));border:1px solid var(--r);border-left:4px solid var(--r);border-radius:6px;padding:10px 12px;margin-bottom:10px;font-size:12px;line-height:1.6}
+.cb.k{background:linear-gradient(90deg,rgba(251,146,60,.15),rgba(251,146,60,.05));border-color:#fb923c;border-left-color:#fb923c}
+.cb.s{background:linear-gradient(90deg,rgba(22,199,132,.12),rgba(22,199,132,.04));border-color:var(--g);border-left-color:var(--g)}
+.cb .bt{font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px}
+.cb.c .bt{color:#ff8080}.cb.k .bt{color:#fb923c}.cb.s .bt{color:#4ade80}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(460px,1fr));gap:14px}
+.front-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.front-col{display:flex;flex-direction:column;gap:12px}
+.front-col-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 14px;background:var(--p);border:1px solid var(--bd);border-radius:10px;border-left:4px solid var(--g)}
+.front-col-head.bear{border-left-color:var(--r)}
+.front-col-head.bull .fh-t{color:var(--g)}
+.front-col-head.bear .fh-t{color:var(--r)}
+.fh-t{font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.5px}
+.fh-s{font-size:11px;color:var(--mu)}
+@media(max-width:1100px){.front-grid{grid-template-columns:1fr}}
+.card{background:var(--p);border:1px solid var(--bd);border-radius:12px;padding:16px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--b)}
+.card.bull::before{background:var(--g)}
+.card.bear::before{background:var(--r)}
+.card.mx::before{background:var(--a)}
+.ch{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:10px}
+.cs{font-size:16px;font-weight:700;color:var(--b);display:flex;align-items:center;gap:8px;flex-wrap:wrap;cursor:pointer}
+.cn{font-size:11px;color:var(--mu);margin-top:2px}
+.cs2{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.sig{font-size:11px;font-weight:700;padding:3px 8px;border-radius:4px;cursor:help}
+.sig.bull{background:var(--gb);color:var(--g)}
+.sig.bear{background:var(--rb);color:var(--r)}
+.sig.mx{background:var(--ab);color:var(--a)}
+.sig.w{box-shadow:0 0 0 1px var(--r)}
+.cbody{font-size:12px;color:var(--mu);margin-bottom:10px;line-height:1.6}
+.cbody strong{color:var(--tx)}
+.ctl{font-size:11px;color:var(--mu);margin-bottom:10px;padding:8px 10px;background:var(--p2);border-radius:6px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.ctl strong{color:var(--tx)}
+.met{background:var(--p);border-radius:6px;padding:8px;text-align:center;cursor:help}
+.met-l{font-size:9px;color:var(--mu);text-transform:uppercase;letter-spacing:.3px;margin-bottom:3px}
+.met-v{font-size:13px;font-weight:700}
+.tp{background:var(--p2);border-radius:8px;padding:10px;font-size:11px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tpi{text-align:center}
+.tpi-l{color:var(--mu);font-size:9px;text-transform:uppercase;margin-bottom:2px}
+.tpi-v{font-weight:700;font-size:13px}
+.il{margin-top:10px;padding-top:10px;border-top:1px solid var(--bd);font-size:11px}
+.ir{display:flex;justify-content:space-between;padding:3px 0;gap:8px}
+.ir .nm{color:var(--mu);flex:1}
+.ir .dt{color:var(--mu);font-size:10px;font-style:italic}
+.ir .qt{color:var(--tx);font-weight:600;white-space:nowrap}
+.lbc{font-weight:700;color:var(--b)}
+.lbb{height:6px;border-radius:3px;background:var(--p2);overflow:hidden;margin-top:4px}
+.lbf{height:100%;background:linear-gradient(90deg,var(--g),var(--b));border-radius:3px}
+.lbr{display:inline-block;width:26px;height:26px;line-height:26px;text-align:center;border-radius:50%;font-size:11px;font-weight:700;background:var(--p2);color:var(--mu)}
+.lbr.t1{background:#3d2e0e;color:#fbbf24}
+.lbr.t2{background:#1e2833;color:#cbd5e1}
+.lbr.t3{background:#3d1e0e;color:#fb923c}
+.em{text-align:center;padding:60px 20px;color:var(--mu)}
+.em h4{font-size:15px;color:var(--tx);margin-bottom:8px}
+.em p{font-size:13px;line-height:1.7;max-width:520px;margin:0 auto 16px}
+.em button{padding:9px 18px;background:var(--bb);color:var(--b);border:1px solid var(--b);border-radius:6px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:600}
+.em button:hover{background:var(--b);color:#fff}
+.hid{display:none !important}
+.ri{font-size:12px;color:var(--mu);margin-bottom:10px}
+.ri strong{color:var(--tx)}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px}
+.md{background:var(--p);border:1px solid var(--bd);border-radius:12px;padding:24px;max-width:460px;width:100%}
+.md h3{font-size:16px;margin-bottom:8px}
+.md p{font-size:13px;color:var(--mu);margin-bottom:16px;line-height:1.6}
+.md-acts{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
+.md-acts button{padding:9px 16px;border-radius:6px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;border:1px solid var(--bd);background:var(--p2);color:var(--tx)}
+.md-acts button.pri{background:var(--g);color:#0b0f14;border-color:var(--g)}
+.dw{position:fixed;top:0;right:0;bottom:0;width:min(720px,100%);background:var(--p);border-left:1px solid var(--bd);z-index:9999;overflow-y:auto;padding:24px;box-shadow:-10px 0 30px rgba(0,0,0,.5)}
+.dw h3{font-size:20px;margin-bottom:4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.dw .sub{font-size:12px;color:var(--mu);margin-bottom:20px}
+.dw-close{position:absolute;top:16px;right:16px;background:var(--p2);border:1px solid var(--bd);color:var(--tx);width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;font-family:inherit}
+.dw-close:hover{background:var(--rb);color:var(--r);border-color:var(--r)}
+.dw-sum{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.dw-sum .met{padding:12px;background:var(--p2)}
+.dw-sum .met-v{font-size:16px}
+.dw h4{font-size:12px;margin:22px 0 10px;color:var(--mu);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--bd);padding-bottom:6px}
+.dw h4 .bc{display:inline-block;background:var(--p2);border-radius:10px;padding:1px 8px;font-size:11px;color:var(--tx);margin-left:6px}
+.dw table{font-size:12px;margin-top:8px}
+.kpi{background:linear-gradient(135deg,var(--p) 0%,var(--p2) 100%);border:1px solid var(--bd);border-radius:10px;padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:.15s;user-select:none}
+.kpi:hover{border-color:var(--b);transform:translateY(-1px);box-shadow:0 4px 14px rgba(59,130,246,.15)}
+.kpi-ic{width:42px;height:42px;border-radius:50%;background:var(--bb);color:var(--b);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.kpi-ic.g{background:var(--gb);color:var(--g)}
+.kpi-ic.a{background:var(--ab);color:var(--a)}
+.kpi-ic.r{background:var(--rb);color:var(--r)}
+.kpi-bd{flex:1}
+.kpi-l{font-size:11px;color:var(--mu);text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin-bottom:2px}
+.kpi-v{font-size:22px;font-weight:800;color:var(--tx)}
+.kpi-sub{font-size:11px;color:var(--mu);margin-top:2px}
+.kpi-arrow{color:var(--mu);font-size:18px;flex-shrink:0}
+.kpi:hover .kpi-arrow{color:var(--b)}
+.kpi-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.namelist{background:var(--p2);border:1px solid var(--bd);border-radius:10px;overflow:hidden}
+.namelist-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;border-bottom:1px solid var(--bd);cursor:pointer;transition:.1s;font-size:13px}
+.namelist-item:last-child{border-bottom:none}
+.namelist-item:hover{background:rgba(59,130,246,.08)}
+.namelist-item .sym{font-size:14px}
+.namelist-item .meta{font-size:11px;color:var(--mu);text-align:right}
+.namelist-item .arr{color:var(--mu);font-size:14px}
+.namelist-item:hover .arr{color:var(--b)}
+.sector-strip{background:var(--p);border:1px solid var(--bd);border-radius:10px;padding:12px 14px;margin-bottom:16px}
+.sector-strip-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.sector-strip-title{font-size:11px;font-weight:700;color:var(--mu);text-transform:uppercase;letter-spacing:.5px}
+.sector-strip-hint{font-size:10px;color:var(--mu);font-style:italic}
+.sector-chips{display:flex;gap:8px;flex-wrap:wrap}
+.sector-chip{display:inline-flex;align-items:center;gap:8px;padding:6px 12px;border-radius:16px;background:var(--p2);border:1px solid var(--bd);color:var(--tx);font-size:12px;cursor:pointer;user-select:none;transition:.12s;font-family:inherit}
+.sector-chip:hover{border-color:#2e3d4d;background:#161f29}
+.sector-chip.on{background:var(--bb);border-color:var(--b);color:var(--b);box-shadow:0 0 0 1px var(--b)}
+.sector-chip .s-name{font-weight:700}
+.sector-chip .s-count{font-size:10px;color:var(--mu);background:rgba(255,255,255,.06);padding:1px 6px;border-radius:8px;font-weight:700}
+.sector-chip.on .s-count{color:var(--b);background:rgba(59,130,246,.15)}
+.sector-chip .s-flow{font-size:11px;font-weight:700}
+@media(max-width:768px){.met-v{font-size:12px}.tp{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.ltp .grid{grid-template-columns:1fr}.dw-sum{grid-template-columns:repeat(2,1fr)}.kpi-row{grid-template-columns:1fr}}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:var(--p2)}
+::-webkit-scrollbar-thumb{background:var(--bd);border-radius:4px}
+</style>
+</head>
+<body>
+<div class="c">
+
+<header>
+<h1>⚡ Bulk Deal Decoder <span>Smart Money Tracker</span></h1>
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+<span id="fileInfo" class="hid" style="font-size:11px;color:var(--mu);padding:3px 8px;background:var(--p2);border-radius:4px;border:1px solid var(--bd)">No file</span>
+<span class="bd">NSE BULK DEALS</span>
+<button id="btnNew" class="btn hid" title="Clear current dataset and upload a fresh CSV">🔄 New Data</button>
+</div>
+</header>
+
+<div class="uz" id="uz">
+<h3>📁 Load NSE Bulk Deals CSV</h3>
+<p>Click the file button below, or drag & drop a CSV into this box</p>
+<input type="file" id="fi" accept=".csv,.txt,text/csv,text/plain,application/vnd.ms-excel">
+</div>
+
+<div class="dbg" id="dbgPanel">
+<div class="dbg-hd"><span>🔍 Upload Debug Log</span><button id="clrLog">Clear</button></div>
+<div id="dbgBody"></div>
+</div>
+
+<div class="stats hid" id="statsBox">
+<div class="st" title="Total number of rows (deals) parsed from the uploaded CSV.">
+  <div class="st-l">Deals Parsed</div>
+  <div class="st-v" id="sTot">—</div>
+</div>
+<div class="st" title="Trades made by HFT (High-Frequency Trading) desks and proprietary traders. These are filtered out to prevent noise.">
+  <div class="st-l">HFT Noise Filtered</div>
+  <div class="st-v mu" id="sNoi">—</div>
+</div>
+<div class="st clk" id="sBCard" title="Click to see the list of stocks with institutional buys. (Individual deals where institutions bought).">
+  <div class="st-l">Inst. Buys</div>
+  <div class="st-v g" id="sB">—</div>
+</div>
+<div class="st clk" id="sSCard" title="Click to see the list of stocks with institutional sells. (Individual deals where institutions sold).">
+  <div class="st-l">Inst. Sells</div>
+  <div class="st-v r" id="sS">—</div>
+</div>
+<div class="st" title="Number of stocks that fell 5% or more on the day they were bought by institutions. Indicates catching a falling knife.">
+  <div class="st-l">Falling Knives</div>
+  <div class="st-v r" id="sK">—</div>
+</div>
+</div>
+
+<div class="tabs hid" id="tabsBox">
+<div class="tab on" data-p="pIns" title="Front page summary of top bullish and bearish stocks.">🎯 Trade Insights</div>
+<div class="tab" data-p="pStk" title="Full table of all stocks with filters, sorting, and LTP inputs.">📊 Stock Summary</div>
+<div class="tab" data-p="pCli" title="Ranking of the most active institutions by capital deployed.">🏆 Client Leaderboard</div>
+<div class="tab" data-p="pDel" title="Chronological list of every single transaction parsed.">📋 Institutional Deals</div>
+<div class="tab" data-p="pNoi" title="Trades that were discarded by the noise filter (HFT, prop desks).">🔇 Filtered Noise</div>
+</div>
+
+<div id="pIns" class="pnl on">
+  <div class="hlp">
+    <strong>💡 Front page at a glance:</strong> Sector rotation first. Then the <strong>top 10 bullish</strong> and <strong>top 10 bearish</strong> stocks by net institutional flow. Click any stock name for the full picture. Use the other tabs to dig deeper or filter.
+  </div>
+
+  <div class="sector-strip" id="sectorStripTop">
+    <div class="sector-strip-head">
+      <div class="sector-strip-title" title="Aggregated net flow for each sector. Click a chip to filter the page.">📊 Sector Overview — where bulk-deal money moved</div>
+      <div class="sector-strip-hint">Click a sector to filter the front page · click active chip to clear</div>
+    </div>
+    <div class="sector-chips" id="sectorChips"></div>
+  </div>
+
+  <div class="ri" id="frontLine">Loading…</div>
+
+  <div class="front-grid">
+    <div class="front-col">
+      <div class="front-col-head bull">
+        <div>
+          <div class="fh-t">🟢 Top Bullish</div>
+          <div class="fh-s">Stocks with strongest net institutional inflow</div>
+        </div>
+        <div class="fh-s" id="bullCount">—</div>
+      </div>
+      <div id="bullList" style="display:flex;flex-direction:column;gap:12px"></div>
+    </div>
+    <div class="front-col">
+      <div class="front-col-head bear">
+        <div>
+          <div class="fh-t">🔴 Top Bearish</div>
+          <div class="fh-s">Stocks with strongest net institutional outflow</div>
+        </div>
+        <div class="fh-s" id="bearCount">—</div>
+      </div>
+      <div id="bearList" style="display:flex;flex-direction:column;gap:12px"></div>
+    </div>
+  </div>
+</div>
+
+<div id="pStk" class="pnl">
+<div class="hlp">
+<strong>💡 Quick guide:</strong> The full workbench. Use the filter bar to narrow. Click any <strong style="color:var(--b)">stock name</strong> for full buyer/seller details. Star ⭐ to watch. Type <strong style="color:var(--r)">Day %</strong> directly in the table (or bulk-paste above). Hover headers for explanations.
+</div>
+
+<div class="kpi-row" style="grid-template-columns:1fr">
+  <div class="kpi" id="kpiWatchlist" title="Stocks you have starred. Click to see them all.">
+    <div class="kpi-ic a">⭐</div>
+    <div class="kpi-bd">
+      <div class="kpi-l">Watchlist</div>
+      <div class="kpi-v" id="kpiWatchlistV">0</div>
+      <div class="kpi-sub">Your starred stocks — click to view all</div>
+    </div>
+    <div class="kpi-arrow">→</div>
+  </div>
+</div>
+
+<div class="ltp">
+<h4>💰 Update Live Prices & Day Change</h4>
+<p>Two independent bulk inputs. Both persist in your browser.</p>
+<div class="grid">
+<div>
+  <label title="Paste multiple symbols and prices separated by commas or tabs.">📈 LTP — SYMBOL,PRICE per line</label>
+  <textarea id="ltpT" placeholder="POLICYBZR,1207.20&#10;NEPHROPLUS,720"></textarea>
+</div>
+<div>
+  <label title="Paste multiple symbols and their day % change.">📉 Day % — SYMBOL,PERCENT (neg=fell)</label>
+  <textarea id="dcT" placeholder="POLICYBZR,-36&#10;NEPHROPLUS,2.5"></textarea>
+</div>
+</div>
+<div class="acts">
+<button id="a1" title="Read the textarea and update the dashboard with these prices.">Apply LTP</button>
+<button class="gh" id="a2" title="Remove all entered prices.">Clear LTP</button>
+<button class="am" id="a3" title="Read the textarea and update the dashboard with these day-change percentages.">Apply Day %</button>
+<button class="gh" id="a4" title="Remove all entered day-change percentages.">Clear Day %</button>
+<button class="gr" id="a5" title="Download the current filtered table as a CSV file.">📥 Export CSV</button>
+</div>
+</div>
+
+<div class="fs">
+<div class="ct" style="margin:0;flex-wrap:wrap;gap:8px">
+<input type="text" id="ss" placeholder="🔍 Search symbol, company, or buyer..." style="min-width:220px" title="Search across symbols, company names, and institution names.">
+<select id="fSig2" title="Filter by overall market signal (Bullish, Bearish, or Mixed).">
+<option value="all">All Signals</option>
+<option value="bull">🟢 Bullish</option>
+<option value="bear">🔴 Bearish</option>
+<option value="mixed">🟡 Mixed</option>
+</select>
+<select id="fInst" title="Filter by the specific type of institution (e.g., Domestic Mutual Fund, Foreign Institutional Investor).">
+<option value="all">All Institutions</option>
+<option value="DII">Domestic MF</option>
+<option value="FII">Foreign Inst</option>
+<option value="INS">Insurance</option>
+<option value="PENSION">Pension</option>
+<option value="SOVEREIGN">Sovereign</option>
+</select>
+<select id="fSec" title="Filter by the auto-detected sector.">
+<option value="all">All Sectors</option>
+</select>
+<select id="fFl" title="Filter by specific trading patterns detected by the dashboard.">
+<option value="all">All Patterns</option>
+<option value="crash">🚨 Sharp Decline</option>
+<option value="knife">⚠️ Falling Knife</option>
+<option value="repeat">🔥 Repeat Buyer</option>
+<option value="consensus">🏆 Consensus</option>
+<option value="aggressive">⚡ Aggressive</option>
+<option value="chasing">📈 Chasing</option>
+<option value="averaging">📉 Averaging</option>
+<option value="fresh">🆕 Fresh</option>
+<option value="cooling">🧊 Cooling</option>
+<option value="watchlist">⭐ Watchlist</option>
+</select>
+<button id="rst" title="Remove all active filters and show all stocks.">↺ Reset Filters</button>
+</div>
+</div>
+
+<div class="afb em" id="afb"></div>
+<div class="ri" id="ri">Showing <strong>0</strong> stocks</div>
+
+<table id="stk"><thead><tr>
+<th class="ns" style="width:96px;text-align:center" title="Click ☆ to add this stock to your personal watchlist.">Watch</th>
+<th class="so" data-sort="symbol" title="NSE stock symbol and company name.">Symbol</th>
+<th class="so" data-sort="sector" style="text-align:center" title="Auto-detected sector based on company name and symbol keywords.">Sector</th>
+<th class="so help" data-sort="firstBuyDate" style="text-align:center" title="Date of the FIRST institutional BUY for this stock. Blank (—) means no institutions bought this stock.">First Buy</th>
+<th class="so help" data-sort="daysHeld" style="text-align:center" title="Days elapsed since the first institutional activity (buy OR sell).">Days</th>
+<th class="so help" data-sort="vwap" style="text-align:right" title="Buy-side VWAP = the weighted average price institutions PAID when buying. Blank means no institutional buyers exist.">Inst VWAP</th>
+<th class="so help" data-sort="ltp" style="text-align:right" title="Live price you enter manually. Used to calculate the institutional P&L.">LTP</th>
+<th class="so help" data-sort="dayChange" style="text-align:right" title="Today's price change in percent. Enter manually or bulk-paste.">Day %</th>
+<th class="so help" data-sort="returnPct" style="text-align:right" title="Institutional P&L = how much the institutions are up/down from their VWAP entry vs the current LTP.">Return %</th>
+<th class="so help" data-sort="netValue" style="text-align:right" title="Institutional Buy Value − Institutional Sell Value. Positive = net inflow, Negative = net outflow.">Net Flow</th>
+<th class="so help" data-sort="buyers" style="text-align:center" title="Number of DISTINCT institutions that bought this stock. Higher = broader consensus.">Buy</th>
+<th class="so help" data-sort="sellers" style="text-align:center" title="Number of DISTINCT institutions that sold this stock.">Sell</th>
+<th class="so help" data-sort="signal" style="text-align:center" title="Net directional signal: BULLISH (net inflow), BEARISH (net outflow), MIXED (institutions are fighting each other).">Signal</th>
+<th class="ns" title="Auto-detected trading patterns and warnings.">Flags</th>
+</tr></thead><tbody></tbody></table>
+</div>
+
+<div id="pCli" class="pnl">
+<div class="ct">
+<input type="text" id="sc" placeholder="Search institution..." title="Search by institution name.">
+<select id="fcT" title="Filter by institution type.">
+<option value="all">All Types</option>
+<option value="DII">Domestic MF</option>
+<option value="FII">Foreign Inst</option>
+<option value="INS">Insurance</option>
+<option value="PENSION">Pension</option>
+<option value="SOVEREIGN">Sovereign</option>
+<option value="FUND">Fund</option>
+</select>
+<select id="sCli" title="Sort the leaderboard by different metrics.">
+<option value="buyValue">Highest Buy Value</option>
+<option value="netValue">Highest Net Flow</option>
+<option value="dealCount">Most Active</option>
+<option value="stockCount">Widest Coverage</option>
+</select>
+</div>
+<div class="ri">Click any institution to see its full trade history</div>
+
+<div class="kpi-row">
+  <div class="kpi" id="kpiCommonCli" title="Stocks where 2+ institutions bought AND 2+ sold. High-conviction disagreement.">
+    <div class="kpi-ic g">🤝</div>
+    <div class="kpi-bd">
+      <div class="kpi-l">Contested Stocks</div>
+      <div class="kpi-v" id="kpiCommonCliV">—</div>
+      <div class="kpi-sub">2+ buyers & 2+ sellers — click for details</div>
+    </div>
+    <div class="kpi-arrow">→</div>
+  </div>
+  <div class="kpi" id="kpiBuyCommonCli" title="Stocks where 3+ distinct institutions bought. Broad institutional consensus.">
+    <div class="kpi-ic">🏆</div>
+    <div class="kpi-bd">
+      <div class="kpi-l">Consensus Buys</div>
+      <div class="kpi-v" id="kpiBuyCommonCliV">—</div>
+      <div class="kpi-sub">3+ institutions buying — click for details</div>
+    </div>
+    <div class="kpi-arrow">→</div>
+  </div>
+</div>
+
+<table id="cliT"><thead><tr>
+<th class="ns" style="width:44px">#</th>
+<th class="ns" title="Name of the institution.">Institution</th>
+<th class="ns" style="text-align:center" title="Classification of the institution (e.g. Domestic MF, FII).">Type</th>
+<th class="ns" style="text-align:right" title="Total value of all shares bought.">Buy Value</th>
+<th class="ns" style="text-align:right" title="Total value of all shares sold.">Sell Value</th>
+<th class="ns" style="text-align:right" title="Buy Value minus Sell Value.">Net Flow</th>
+<th class="ns" style="text-align:center" title="Number of unique stocks this institution traded.">Stocks</th>
+<th class="ns" style="text-align:center" title="Total number of transactions made.">Deals</th>
+<th class="ns" title="Visual bar showing relative capital deployed vs the top-ranked institution.">Capital</th>
+</tr></thead><tbody></tbody></table>
+</div>
+
+<div id="pDel" class="pnl">
+<div class="ct">
+<input type="text" id="sd" placeholder="Search symbol or institution..." title="Search by stock symbol or institution name.">
+<select id="fSide" title="Filter by Buy or Sell side.">
+<option value="all">All Sides</option>
+<option value="BUY">Buy Only</option>
+<option value="SELL">Sell Only</option>
+</select>
+<select id="fSecD" title="Filter by sector.">
+<option value="all">All Sectors</option>
+</select>
+<input type="date" id="dF" style="flex:0 0 auto;min-width:150px" title="Filter from this date onwards.">
+<input type="date" id="dT" style="flex:0 0 auto;min-width:150px" title="Filter up to this date.">
+<button id="clrD" title="Clear the date filters.">Clear Dates</button>
+</div>
+
+<div class="kpi-row">
+  <div class="kpi" id="kpiCommonDel" title="Stocks where 2+ institutions bought AND 2+ sold. High-conviction disagreement.">
+    <div class="kpi-ic g">🤝</div>
+    <div class="kpi-bd">
+      <div class="kpi-l">Contested Stocks</div>
+      <div class="kpi-v" id="kpiCommonDelV">—</div>
+      <div class="kpi-sub">2+ buyers & 2+ sellers — click for details</div>
+    </div>
+    <div class="kpi-arrow">→</div>
+  </div>
+  <div class="kpi" id="kpiBuyCommonDel" title="Stocks where 3+ distinct institutions bought. Broad institutional consensus.">
+    <div class="kpi-ic">🏆</div>
+    <div class="kpi-bd">
+      <div class="kpi-l">Consensus Buys</div>
+      <div class="kpi-v" id="kpiBuyCommonDelV">—</div>
+      <div class="kpi-sub">3+ institutions buying — click for details</div>
+    </div>
+    <div class="kpi-arrow">→</div>
+  </div>
+</div>
+
+<table id="delT"><thead><tr>
+<th title="Date of the transaction.">Date</th>
+<th title="NSE stock symbol.">Symbol</th>
+<th title="Auto-detected sector.">Sector</th>
+<th title="Institution that made the trade.">Institution</th>
+<th title="Buy or Sell.">Side</th>
+<th style="text-align:right" title="Number of shares traded.">Quantity</th>
+<th style="text-align:right" title="Price per share.">Price</th>
+<th style="text-align:right" title="Quantity × Price.">Value (₹)</th>
+</tr></thead><tbody></tbody></table>
+</div>
+
+<div id="pNoi" class="pnl">
+<p class="mu" style="margin-bottom:12px;font-size:12px">HFT / proprietary desks. Same-side both buy and sell with razor-thin margins. Liquidity, not conviction.</p>
+<table id="noiT"><thead><tr><th title="NSE stock symbol.">Symbol</th><th title="Name of the HFT desk or prop trader.">Client</th><th title="Buy or Sell.">Side</th><th title="Number of shares traded.">Quantity</th><th title="Price per share.">Price</th></tr></thead><tbody></tbody></table>
+</div>
+
+</div>
+
+<script>
+function esc(s){return String(s||'').replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+
+function dlog(msg, lvl){
+  lvl = lvl || 'i';
+  try {
+    var body = document.getElementById('dbgBody');
+    if(body){
+      var ts = new Date().toLocaleTimeString('en-IN',{hour12:false});
+      var line = document.createElement('div');
+      line.className = 'dl ' + lvl;
+      line.innerHTML = '<span class="ts">[' + ts + ']</span>' + esc(msg);
+      body.appendChild(line);
+      body.scrollTop = body.scrollHeight;
+    }
+  } catch(e){}
+  if(lvl === 'e'){
+    console.error(msg);
+    var _p = document.getElementById('dbgPanel');
+    if(_p) _p.classList.add('show');
+  }
+  else if(lvl === 'w') console.warn(msg);
+  else console.log(msg);
+}
+
+window.addEventListener('error', function(ev){
+  dlog('❌ JS ERROR: ' + ev.message + ' @ line ' + ev.lineno + ':' + ev.colno, 'e');
+});
+
+dlog('Page starting...', 'o');
+</script>
+
+<script>
+window.__mainRan = false;
+dlog('Main script parsing...', 'i');
+
+var NOISE = ['HRTI PRIVATE','JUNOMONETA','MICROCURVES','NK SECURITIES','QE SECURITIES','IRAGE BROKING','JUMP TRADING','ALPHAGREP','SILVERLEAF CAPITAL','MATHISYS','BLITZQUANT','CLT RESEARCH','GRT STRATEGIC','GOLDMINE STOCKS','DIPAN MEHTA','ELIXIR WEALTH','MARWADI','PURE BROKING','YUGA STOCKS','MUSIGMA','SHARE INDIA','MANSI SHARE','NEO APEX','ORION STOCKS','ARIHANT CAPITAL','L7 HITECH','ACME CAPITAL','ALTIZEN VENTURES','BULLPULSE','CHAUBARA EATS','HJS SECURITIES','JIAUM BROKING','PRRSAAR','RATHOD DIGVIJAYSINH','VISHAL MAHESH WAGHELA','MAHESH MULCHAND WAGHELA','KARAN RASHMIKANT SHAH','VIRTI ENTERPRISE','NIRAJ RAJNIKANT SHAH','JAGID VANITABEN','BHAVISHYA ECOMMERCE','SATISH MEJIYATAR','ROHIT KISHOR RATHI','SHREY JAIN','VISTAAR TRADING','PROGNOSIS SECURITIES','HI GROWTH','MULTIPLIER SHARE','F3 ADVISORS','D3 STOCK','QICAP','PACE COMMODITY','STATSOL','VAYUMIND','MADHAV ENTERPRISE','MAHARASTRA ENTERPRISE','NRIP JAIN','DEVANSH GOEL','SHRENI SHARES','GRATIAS','EARC TRUST','JATINKUMAR M SHAH','KLEIO','PRIJAL TRADEFIN','SAHASTRAA','SETU SECURITIES','TALISMAN','MANGAL KESHAV','AAYUSHMAN RAJESH','TRADE SOLVENT','RAJASTHAN GLOBAL','SILVER LINE VENTURES','TWO ROADS TRADING','PLUTUS RESEARCH','PLUTUS WEALTH','OM TRADING','PUMA SECURITIES','VINSUL MAKARDI','MAHAVEER COMSTOCK','PEER GLOBAL','SUNNY GAMBHIR','GRAVITON','KABRA KAILASH','KABRA PRIYA','KAUSHAL MANOJBHAI','URJA INVESTMENT','INVICTO','DHANJIT REAL','ALGOQUANT','SUMAN KUMAR SARAF','ACE INDUSTRIES','BONANZA','ASHA MAHESH','CORE INC','BINACA','VISTA AXIS','VERTEX BULLION','UNI GROWTH','S I INVESTMENTS','MINDSET SECURITIES','GREEN PARK','NEOMILE','TENCORE','ANCHORAGE','8 SQUARE','AHINSA','BINDU GARG','AMIT GARG','BEENA JAIN','KALYANARANGAN','NARESH KUMAR','M/S VA TRADING','P K A CAPITAL','RIDDHI SIDDHI','MANCREDIT','LUNOVA','EXMARK','ARUNA AGARWAL','CARNELIAN','OHANA','AGARWAL FAMILY','CHIPS AND BYTES','NITIN JAIN','BELA AGRAWAL','ANASUYA GORLA','CHARAN REDDY','SHIVANI TEJAS','ANVIL SHARE','THIRUMALAI','VIRALI','DHARA VIRAL','ESCORP','SHINCHO','ABHINANDAN LEASING','VISION AHEAD','KRONE INVESTMENTS','SOUTHWEST','SREEL','DEALMONEY','ASHIKA GLOBAL','PRASAD A.RAJENDRA','GUTTIKONDA','PRITHVI','LEKHRAJ','ANURADHA BAJAJ','S A CAPITALS','SERA INVESTMENTS','SHAH JAYESHKUMAR','PANKAJ PRASOON','MANISH MAHENDRA MODI','MATHEWS VARUGHESE','PRATIK VIRENDRA','RAVI RAJAGOPALAN','SANJAY KUMAR GUPTA','SANDEEP NARESH SHAH','LAXMI TRADE','INDRA KIRAN','K RAJ BUSINESS','ARPIT JAIN','AMRITA JAIN','ANKITA VISHAL','PRIYA MILAN','ADITI MEHTA','SUMICKSHA BANSAL','YASHWANT AMRATLAL','THAKKAR RASHMIKANT','ABUNDANTIA','TWIN BULLS','SARVAD INFRABUILD','KISHAN GOPAL','DHARMENDRA','AMIT BALKRISHNA','SEEHRA MANINDER','TRILOCHAN SINGH','PRAGYA MERCANTILE','SIMPLEX','KUNJIT MAHESHBHAI','THAKOR NAYANA','KUBER','ANANT WEALTH','ANANTHARAMAN','GIRIRAJ STOCK','ABDURRAHMAN','NITESH KUMAR','VINAY JAIPRAKASH','SHAH DIPAK','MANSUKH SECURITIES','J4S FINANCIAL','ARDA CONFERENCE','RISING CORPORATION','MAGSON','RAJESH EMMANUEL','CP CAPITAL','BIMAL KUMAR','KAYA','V.E.C','JE KE INVESTMENTS','KARAMTARA','AUTHUM','NEOMILE GROWTH','MAHENDRA REALTO','OCTASPACE','GIRIRAJ CIVIL','LRSD SECURITIES','ASTORNE','CHITTILAPPILLY','RAGHAV INVESTMENT','PATILAUTOM','ASHUTOSH','VENKATA NAGARAJU','KIFS','NNM SECURITIES','BALAJI PHOSPHATES','MEGATHERM','HIGH GROWTH','VEDAVAAG','BHARAT BATTERY','ISTAA','MUKESH CHAMPAKLAL','SHARDABEN','PARESHKUMAR','MAHESH PRAKASH','NIRMALKUMAR PAREEK','PRABHU LAL MEENA','KISHAN GOPAL MOHTA','RAMASWAMY ANAND'];
+
+function isNoise(c){
+  var cu = c.toUpperCase();
+  for(var i = 0; i < NOISE.length; i++){
+    if(cu.indexOf(NOISE[i]) >= 0) return true;
+  }
+  return false;
+}
+
+var PATS = [
+  {re:/\b(MUTUAL FUND|MF)\b/i, t:'DII', l:'Domestic MF'},
+  {re:/\bLIFE INSURANCE\b|\bINSURANCE COMPANY\b|\bSBI LIFE\b/i, t:'INS', l:'Insurance'},
+  {re:/\bPENSION\b/i, t:'PENSION', l:'Pension Fund'},
+  {re:/\bINVESTMENT AUTHORITY\b|\bGOVERNMENT OF\b/i, t:'SOVEREIGN', l:'Sovereign'},
+  {re:/\b(BLACKROCK|VANGUARD|GOLDMAN SACHS|MORGAN STANLEY|BNP PARIBAS|SOCIETE GENERALE|CITIGROUP|EURO PACIFIC|SMALLCAP WORLD|ABU DHABI INVESTMENT|INTEGRATED CORE STRATEGIES|LIGHTSPEED|CHISWICK|OMAN INDIA|POLUNIN|NTASIAN|ALPHA WAVE|PLATINUM JASMINE|PEAK XV|RIBBIT|GENERAL ATLANTIC|ARANDA|FIDELITY|EIGHT ROADS|LEAPFROG|COHESION|ACCION|SINGULARITY|FIVEX|VIKASA|CRAFT EMERGING|M7 GLOBAL|NOVA GLOBAL|BEACON STONE|CAPRI GLOBAL|FIRST BRIDGE|CSIM INDIA|KUBER INDIA|LONGTHRIVE|ABS DIRECT|CAPITAL ONE PARTNERS|CHIRATAE)\b/i, t:'FII', l:'Foreign Inst'},
+  {re:/\b(SBI|ICICI PRUDENTIAL|HDFC|NIPPON|MIRAE|KOTAK|DSP|QUANT|ADITYA BIRLA|BANDHAN|EDELWEISS|MOTILAL OSWAL|MAHINDRA MANULIFE|360 ONE|HELIOS|INVESCO|HSBC|GROWW|AXIS|FRANKLIN|CANARA|TATA|UNION|UTI|LIC|IDFC|SUNDARAM|PPFAS|NAVI|SAMCO|WHITEOAK)\b/i, t:'DII', l:'Domestic MF'},
+  {re:/\b(FUND|CAPITAL|HOLDINGS|INVESTMENTS)\b/i, t:'FUND', l:'Institutional'}
+];
+
+function classify(c){
+  for(var i = 0; i < PATS.length; i++){
+    if(PATS[i].re.test(c)) return {isInst:true, t:PATS[i].t, l:PATS[i].l};
+  }
+  return {isInst:false, t:'OTHER', l:'Other'};
+}
+
+var SECS = [
+  {n:'Pharma', r:/PHARMA|PHARMALAB|LAB|LIFESCI|BIO|MEDI|HEALTH|DRUG|CARE|REM|HOSP|DIAGNOST|NUTR|CEUTICAL|NEPHRO/i},
+  {n:'Jewellery', r:/JEWEL|GOLD|SILVER|DIAMOND|BULLION|GEMS/i},
+  {n:'Metals', r:/STEEL|ALLOY|METAL|IRON|MINING|ALUM|COPPER|ZINC|FORGE|CAST|WIRE|TUBE|PIPE/i},
+  {n:'Chemicals', r:/CHEM|POLY|PETRO|FERT|AGRO|SPECIALTY|ORGANIC|SOLVENT|RESIN|PIGMENT/i},
+  {n:'Financials', r:/FIN|BANK|CREDIT|CAPITAL|NBFC|INSUR|AMC|FUND|WEALTH|BROKING|SECURITIES|LEAS/i},
+  {n:'IT', r:/TECH|SOFT|INFO|DIGIT|CYBER|DATA|CLOUD|SYSTEM|SOLUTIONS|MIND|eGOV/i},
+  {n:'Real Estate', r:/REAL|PROPERT|ESTATE|BUILD|INFRA|CONSTR|ENGINE|HOUS|REALTO|DEVELOP/i},
+  {n:'Energy', r:/POWER|ENERGY|OIL|GAS|SOLAR|WIND|RENEW|GREEN|COAL|PETROLEUM/i},
+  {n:'Auto', r:/AUTO|MOTOR|VEHIC|TYRE|WHEEL|AXLE|BEARING/i},
+  {n:'FMCG', r:/FOOD|BEVER|DAIRY|CONSUM|FMCG|TEA|SUGAR|TOBACCO|AGRI|FARM|MILK|RICE/i},
+  {n:'Textile', r:/TEXT|COTTON|YARN|FABRIC|GARMENT|APPAREL|SPIN|WEAV|KNIT/i},
+  {n:'Telecom', r:/TELECOM|COMM|NETWORK|BROADBAND|WIRELESS|5G|TOWER/i},
+  {n:'Logistics', r:/LOGIST|SHIPP|TRANSPORT|FREIGHT|CARGO|PORT|COURIER/i},
+  {n:'Consumer', r:/RETAIL|ENTERTAIN|MEDIA|HOTEL|TRAVEL|TOUR|LEISURE|RESTAURANT/i},
+  {n:'Electronics', r:/ELECTRON|SEMICONDUCT|CHIP|CIRCUIT|INSTRUMENT|SENSOR|ELECTRIC/i},
+  {n:'Aviation', r:/AVIAT|AIRLINE|AIRPORT|AERO|AIRWAYS/i},
+  {n:'Packaging', r:/PACKAG|CONTAINER|FLEXI|CARTON|PLASTIC/i}
+];
+
+function detectSector(sym, name){
+  var h = (sym + ' ' + (name||'')).toUpperCase();
+  for(var i = 0; i < SECS.length; i++){
+    if(SECS[i].r.test(h)) return SECS[i].n;
+  }
+  return 'Other';
+}
+
+var FLAG_META = {
+  crash:{i:'🚨',l:'Sharp Decline'},
+  knife:{i:'⚠️',l:'Falling Knife'},
+  squeeze:{i:'🚀',l:'Sharp Rally'},
+  repeat:{i:'🔥',l:'Repeat Buyer'},
+  consensus:{i:'🏆',l:'Consensus'},
+  aggressive:{i:'⚡',l:'Aggressive'},
+  chasing:{i:'📈',l:'Chasing'},
+  averaging:{i:'📉',l:'Averaging'},
+  fresh:{i:'🆕',l:'Fresh'},
+  cooling:{i:'🧊',l:'Cooling'},
+  mixed:{i:'🔀',l:'Mixed'},
+  watchlist:{i:'⭐',l:'Watchlist'}
+};
+
+var LTP_KEY='bd_ltp_v5', WL_KEY='bd_wl_v5', DC_KEY='bd_dc_v5';
+var LTP={}, DC={}, WL=new Set();
+
+try{ LTP = JSON.parse(localStorage.getItem(LTP_KEY)||'{}'); }catch(e){ LTP = {}; }
+try{ DC = JSON.parse(localStorage.getItem(DC_KEY)||'{}'); }catch(e){ DC = {}; }
+try{ WL = new Set(JSON.parse(localStorage.getItem(WL_KEY)||'[]')); }catch(e){ WL = new Set(); }
+
+function getLTP(s){ return LTP[s] || 0; }
+function setLTP(s, p){ if(p > 0) LTP[s] = p; else delete LTP[s]; try{ localStorage.setItem(LTP_KEY, JSON.stringify(LTP)); }catch(e){} }
+function getDC(s){ return Object.prototype.hasOwnProperty.call(DC, s) ? DC[s] : null; }
+function setDC(s, p){ if(p === 0 || p === null || p === undefined) delete DC[s]; else DC[s] = p; try{ localStorage.setItem(DC_KEY, JSON.stringify(DC)); }catch(e){} }
+function saveWL(){ try{ localStorage.setItem(WL_KEY, JSON.stringify(Array.from(WL))); }catch(e){} }
+function toggleWL(s){ if(WL.has(s)) WL.delete(s); else WL.add(s); saveWL(); }
+
+var ST = {
+  all:[], noise:[], inst:[], stocks:[], insights:[], clients:[],
+  aSig:'all', aCon:'all', aInst:'all', aSrch:'', aSec:'all', aFlags:new Set(), aFlag:'all',
+  frontSec:'all',
+  sKey:'netValue', sDir:'desc', fname:''
+};
+
+function parseCSV(txt){
+  var firstLine = txt.split(/\r?\n/)[0];
+  var tabs = (firstLine.match(/\t/g)||[]).length;
+  var commas = (firstLine.match(/,/g)||[]).length;
+  var delim = tabs >= commas ? '\t' : ',';
+  var rows = [], cur = [], field = '', inQ = false;
+  for(var i = 0; i < txt.length; i++){
+    var ch = txt[i], nx = txt[i+1];
+    if(inQ){
+      if(ch === '"' && nx === '"'){ field += '"'; i++; }
+      else if(ch === '"'){ inQ = false; }
+      else field += ch;
+    } else {
+      if(ch === '"') inQ = true;
+      else if(ch === delim){ cur.push(field); field = ''; }
+      else if(ch === '\n'){ cur.push(field); rows.push(cur); cur = []; field = ''; }
+      else if(ch === '\r'){ /* skip */ }
+      else field += ch;
+    }
+  }
+  if(field.length || cur.length){ cur.push(field); rows.push(cur); }
+  return rows.filter(function(r){ return r.some(function(c){ return c.trim().length; }); });
+}
+
+function num(s){ if(!s) return 0; return parseFloat(String(s).replace(/[",\s]/g,'')) || 0; }
+
+var MONTHS = {jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+function parseDate(s){
+  if(!s) return null;
+  s = String(s).trim();
+  var m = s.match(/^(\d{1,2})-([A-Za-z]{3})-(\d{2,4})$/);
+  if(m){ var d = parseInt(m[1]), mo = MONTHS[m[2].toLowerCase()], y = parseInt(m[3]); if(y < 100) y += 2000; return new Date(y, mo, d); }
+  m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return new Date(parseInt(m[1]), parseInt(m[2])-1, parseInt(m[3]));
+  m = s.match(/^(\d{1,2})[\/](\d{1,2})[\/](\d{2,4})/);
+  if(m){ var y2 = parseInt(m[3]); if(y2 < 100) y2 += 2000; return new Date(y2, parseInt(m[2])-1, parseInt(m[1])); }
+  return null;
+}
+
+function daysBetween(a, b){ if(!a || !b) return 0; return Math.floor((b-a)/(1000*60*60*24)); }
+function fmtD(d){ if(!d) return '—'; return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'2-digit'}); }
+function fmtCr(v){
+  var a = Math.abs(v);
+  if(a >= 1e7) return (v/1e7).toFixed(2) + ' Cr';
+  if(a >= 1e5) return (v/1e5).toFixed(2) + ' L';
+  if(a >= 1e3) return (v/1e3).toFixed(1) + ' K';
+  return v.toFixed(0);
+}
+function fmtN(n){ if(!n) return '0'; return n.toLocaleString('en-IN'); }
+function fmtCrSigned(v){
+  var sign = v >= 0 ? '+' : '−';
+  return sign + '₹' + fmtCr(Math.abs(v));
+}
+
+function dash(tip){
+  return '<span class="dash" title="' + esc(tip) + '">—</span>';
+}
+
+function processCSV(txt, fname){
+  dlog('Processing: ' + fname + ' (' + txt.length + ' chars)', 'i');
+  var rows = parseCSV(txt);
+  dlog('Parsed ' + rows.length + ' rows', 'i');
+  if(rows.length < 2){ dlog('Too few rows', 'e'); alert('No data rows found.'); return; }
+
+  var hd = rows[0].map(function(h){ return h.trim().toLowerCase(); });
+  dlog('Header: ' + hd.join(' | '), 'i');
+
+  var idx = {
+    date:   hd.findIndex(function(h){ return h.indexOf('date') >= 0; }),
+    sym:    hd.findIndex(function(h){ return h.indexOf('symbol') >= 0; }),
+    name:   hd.findIndex(function(h){ return h.indexOf('security name') >= 0; }),
+    cli:    hd.findIndex(function(h){ return h.indexOf('client name') >= 0; }),
+    side:   hd.findIndex(function(h){ return h.indexOf('buy / sell') >= 0 || h === 'buy / sell' || h.indexOf('buy/sell') >= 0; }),
+    qty:    hd.findIndex(function(h){ return h.indexOf('quantity') >= 0; }),
+    price:  hd.findIndex(function(h){ return h.indexOf('price') >= 0; })
+  };
+  dlog('Column indexes: date=' + idx.date + ' sym=' + idx.sym + ' cli=' + idx.cli + ' side=' + idx.side + ' qty=' + idx.qty + ' price=' + idx.price, 'i');
+
+  if(idx.cli < 0 || idx.side < 0){
+    dlog('Missing required columns', 'e');
+    alert('Cannot find required columns (Client Name / Buy / Sell).');
+    return;
+  }
+
+  ST.all = []; ST.noise = []; ST.inst = [];
+  ST.fname = fname || 'Uploaded CSV';
+
+  for(var i = 1; i < rows.length; i++){
+    var r = rows[i];
+    var cli = (r[idx.cli] || '').trim();
+    if(!cli) continue;
+    var ds = (r[idx.date] || '').trim();
+    var row = {
+      date: ds,
+      dt: parseDate(ds),
+      sym: (r[idx.sym] || '').trim(),
+      name: (r[idx.name] || '').trim(),
+      cli: cli,
+      side: (r[idx.side] || '').trim().toUpperCase(),
+      qty: num(r[idx.qty]),
+      price: num(r[idx.price])
+    };
+    row.val = row.qty * row.price;
+    ST.all.push(row);
+
+    if(isNoise(cli)){ ST.noise.push(row); continue; }
+    var cls = classify(cli);
+    if(cls.isInst){ row.type = cls.t; row.label = cls.l; ST.inst.push(row); }
+    else ST.noise.push(row);
+  }
+  dlog('Parsed: total=' + ST.all.length + ' noise=' + ST.noise.length + ' inst=' + ST.inst.length, 'o');
+
+  buildStocks();
+  buildInsights();
+  buildClients();
+  buildSectors();
+  render();
+
+  dlog('✓ Ready with ' + ST.stocks.length + ' stocks', 'o');
+
+  document.getElementById('statsBox').classList.remove('hid');
+  document.getElementById('tabsBox').classList.remove('hid');
+  document.getElementById('btnNew').classList.remove('hid');
+  var fi = document.getElementById('fileInfo');
+  fi.classList.remove('hid');
+  fi.textContent = '📁 ' + ST.fname;
+
+  var uz = document.getElementById('uz');
+  uz.innerHTML = '<h3 style="color:var(--g)">✓ ' + esc(ST.fname) + ' loaded</h3>' +
+    '<p>' + ST.all.length + ' rows · ' + ST.inst.length + ' institutional deals · ' + ST.stocks.length + ' stocks</p>' +
+    '<input type="file" id="fi" accept=".csv,.txt,text/csv,text/plain,application/vnd.ms-excel">';
+  bindFI('fi');
+  dlog('Upload zone refreshed, ready for next file', 'i');
+}
+
+function buildStocks(){
+  var map = {};
+  for(var i = 0; i < ST.inst.length; i++){
+    var r = ST.inst[i];
+    if(!map[r.sym]) map[r.sym] = {
+      sym:r.sym, name:r.name, buyV:0, sellV:0, netV:0,
+      buyers:new Set(), sellers:new Set(),
+      buyQty:0, buyQtyForAvg:0, buyValForAvg:0,
+      sellQty:0, sellQtyForAvg:0, sellValForAvg:0,
+      types:new Set(), rows:[], buyDates:new Set(),
+      cliBuyCount:new Map(),
+      fBuyD:null, lBuyD:null, fSellD:null, lSellD:null,
+      fBuyPrice:0, lBuyPrice:0, fBuyDt:null, lBuyDt:null
+    };
+    var s = map[r.sym];
+    s.rows.push(r);
+    s.types.add(r.type);
+    if(r.side === 'BUY'){
+      s.buyV += r.val;
+      s.buyQty += r.qty;
+      s.buyValForAvg += r.val;
+      s.buyQtyForAvg += r.qty;
+      s.buyers.add(r.cli);
+      if(r.dt){
+        s.buyDates.add(r.dt.getTime());
+        if(!s.fBuyD || r.dt < s.fBuyD) s.fBuyD = r.dt;
+        if(!s.lBuyD || r.dt > s.lBuyD) s.lBuyD = r.dt;
+        if(!s.fBuyDt || r.dt < s.fBuyDt){ s.fBuyDt = r.dt; s.fBuyPrice = r.price; }
+        if(!s.lBuyDt || r.dt > s.lBuyDt){ s.lBuyDt = r.dt; s.lBuyPrice = r.price; }
+        if(!s.cliBuyCount.has(r.cli)) s.cliBuyCount.set(r.cli, new Set());
+        s.cliBuyCount.get(r.cli).add(r.dt.getTime());
+      }
+    } else if(r.side === 'SELL'){
+      s.sellV += r.val;
+      s.sellQty += r.qty;
+      s.sellValForAvg += r.val;
+      s.sellQtyForAvg += r.qty;
+      s.sellers.add(r.cli);
+      if(r.dt){
+        if(!s.fSellD || r.dt < s.fSellD) s.fSellD = r.dt;
+        if(!s.lSellD || r.dt > s.lSellD) s.lSellD = r.dt;
+      }
+    }
+    s.netV = s.buyV - s.sellV;
+    s.vwap = s.buyQtyForAvg > 0 ? s.buyValForAvg / s.buyQtyForAvg : 0;
+    s.sellVwap = s.sellQtyForAvg > 0 ? s.sellValForAvg / s.sellQtyForAvg : 0;
+  }
+
+  var TODAY = new Date();
+  ST.stocks = Object.keys(map).map(function(k){
+    var s = map[k];
+    var refD = s.fBuyD || s.fSellD;
+    var daysHeld = refD ? daysBetween(refD, TODAY) : 0;
+    var daysSinceLastBuy = s.lBuyD ? daysBetween(s.lBuyD, TODAY) : 999;
+    var accumDays = s.buyDates.size;
+    var sector = detectSector(s.sym, s.name);
+    var ltp = getLTP(s.sym);
+    var retPct = (ltp > 0 && s.vwap > 0) ? ((ltp - s.vwap) / s.vwap) * 100 : null;
+    var dayChg = getDC(s.sym);
+
+    var buyPnlAbs = (ltp > 0 && s.vwap > 0 && s.buyQty > 0) ? ((ltp - s.vwap) * s.buyQty) : null;
+    var sellPnlAbs = (ltp > 0 && s.sellVwap > 0 && s.sellQty > 0) ? ((s.sellVwap - ltp) * s.sellQty) : null;
+    var netPnlAbs = null;
+    if(buyPnlAbs !== null || sellPnlAbs !== null){
+      netPnlAbs = (buyPnlAbs || 0) + (sellPnlAbs || 0);
+    }
+
+    var repeats = [];
+    s.cliBuyCount.forEach(function(dates, cli){ if(dates.size >= 3) repeats.push(cli); });
+
+    var trend = 'flat';
+    if(s.fBuyPrice > 0 && s.lBuyPrice > 0 && s.fBuyDt && s.lBuyDt && s.fBuyDt.getTime() !== s.lBuyDt.getTime()){
+      var diff = (s.lBuyPrice - s.fBuyPrice) / s.fBuyPrice;
+      if(diff > 0.05) trend = 'chasing';
+      else if(diff < -0.05) trend = 'averaging';
+    }
+
+    var flags = [];
+    if(dayChg !== null){
+      if(dayChg <= -15) flags.push('crash');
+      else if(dayChg <= -5) flags.push('knife');
+      else if(dayChg >= 10) flags.push('squeeze');
+    }
+    if(repeats.length > 0) flags.push('repeat');
+    if(s.buyers.size >= 3) flags.push('consensus');
+    if(accumDays >= 3) flags.push('aggressive');
+    if(trend === 'chasing') flags.push('chasing');
+    if(trend === 'averaging') flags.push('averaging');
+    if(daysHeld > 0 && daysHeld <= 7 && s.netV > 0) flags.push('fresh');
+    
+    if(daysSinceLastBuy > 10 && s.netV > 0 && trend !== 'chasing' && accumDays < 3) {
+      flags.push('cooling');
+    }
+    
+    if(s.buyers.size >= 2 && s.sellers.size >= 2) flags.push('mixed');
+
+    return {
+      sym:s.sym, name:s.name, buyV:s.buyV, sellV:s.sellV, netV:s.netV,
+      buyers:s.buyers.size, sellers:s.sellers.size,
+      buyerList:Array.from(s.buyers), sellerList:Array.from(s.sellers),
+      typeList:Array.from(s.types),
+      daysHeld:daysHeld, daysSinceLastBuy:daysSinceLastBuy, accumDays:accumDays,
+      sector:sector, ltp:ltp, retPct:retPct, dayChg:dayChg,
+      vwap:s.vwap, sellVwap:s.sellVwap,
+      buyQty:s.buyQty, sellQty:s.sellQty,
+      buyPnlAbs:buyPnlAbs, sellPnlAbs:sellPnlAbs, netPnlAbs:netPnlAbs,
+      fBuyD:s.fBuyD, lBuyD:s.lBuyD, fSellD:s.fSellD, lSellD:s.lSellD,
+      rows:s.rows, flags:flags, repeats:repeats
+    };
+  });
+}
+
+function buildInsights(){
+  ST.insights = ST.stocks.map(function(s){
+    var sig = 'mixed';
+    if(s.netV > 0 && s.buyers >= 1 && s.sellers === 0) sig = 'bull';
+    else if(s.netV < 0 && s.sellers >= 1 && s.buyers === 0) sig = 'bear';
+    else if(s.netV > 0) sig = 'bull';
+    else if(s.netV < 0) sig = 'bear';
+
+    var con = 'medium';
+    if(sig === 'bull' && s.buyers >= 3 && s.buyV > 5e7) con = 'high';
+    else if(sig === 'bull' && s.buyers >= 2 && s.buyV > 1e7) con = 'high';
+    else if(sig === 'bull' && s.buyV > 5e7) con = 'high';
+    else if(sig === 'bear' && s.sellers >= 2 && s.sellV > 1e7) con = 'high';
+
+    if(s.dayChg !== null && s.dayChg <= -15 && con === 'high') con = 'medium';
+
+    var entry = s.vwap, sl = 0, t1 = 0, t2 = 0;
+    if(s.vwap > 0){ sl = entry*0.96; t1 = entry*1.08; t2 = entry*1.15; }
+
+    var warn = '';
+    if(s.dayChg !== null){
+      if(s.dayChg <= -15){
+        warn = '<div class="cb c"><span class="bt">🚨 Critical — Sharp Decline</span>Stock fell <strong>' + s.dayChg.toFixed(2) + '%</strong> on the day this institutional buying was recorded. Institutions bought into a serious crash. Wait for stabilisation.</div>';
+      } else if(s.dayChg <= -5){
+        warn = '<div class="cb k"><span class="bt">⚠️ Warning — Falling Knife</span>Stock fell <strong>' + s.dayChg.toFixed(2) + '%</strong> on the day this institutional buying was recorded. Exercise caution.</div>';
+      } else if(s.dayChg >= 10){
+        warn = '<div class="cb s"><span class="bt">🚀 Sharp Rally</span>Stock rose <strong>+' + s.dayChg.toFixed(2) + '%</strong> on the day institutions bought. Watch for pullbacks.</div>';
+      }
+    }
+
+    var narr = '';
+    var ds = s.fBuyD ? ' starting ' + fmtD(s.fBuyD) : (s.fSellD ? ' starting ' + fmtD(s.fSellD) : '');
+    if(sig === 'bull'){
+      narr = '<strong>' + s.buyers + '</strong> institution' + (s.buyers>1?'s':'') + ' accumulated <strong>₹' + fmtCr(s.buyV) + '</strong> worth of <strong>' + s.sym + '</strong>' + ds;
+      if(s.sellers > 0) narr += ' while ' + s.sellers + ' sold ₹' + fmtCr(s.sellV) + '.';
+      else narr += ' with zero institutional selling.';
+      if(s.accumDays >= 3) narr += ' Spread across <strong>' + s.accumDays + ' sessions</strong>.';
+    } else if(sig === 'bear'){
+      narr = '<strong>' + s.sellers + '</strong> institution' + (s.sellers>1?'s':'') + ' distributed <strong>₹' + fmtCr(s.sellV) + '</strong> worth of <strong>' + s.sym + '</strong>' + ds;
+      if(s.buyers > 0) narr += ' partially absorbed by ' + s.buyers + ' buyer(s).';
+    } else {
+      narr = 'Mixed signals. Net flow <strong>' + (s.netV>=0?'+':'') + '₹' + fmtCr(Math.abs(s.netV)) + '</strong>.';
+    }
+
+    return Object.assign({}, s, {signal:sig, conviction:con, entry:entry, sl:sl, t1:t1, t2:t2, narr:narr, warn:warn});
+  }).sort(function(a,b){
+    var as = a.dayChg === null ? 0 : (a.dayChg <= -15 ? -2 : (a.dayChg <= -5 ? -1 : 0));
+    var bs = b.dayChg === null ? 0 : (b.dayChg <= -15 ? -2 : (b.dayChg <= -5 ? -1 : 0));
+    if(as !== bs) return as - bs;
+    return Math.abs(b.netV) - Math.abs(a.netV);
+  });
+}
+
+function buildClients(){
+  var map = {};
+  for(var i = 0; i < ST.inst.length; i++){
+    var r = ST.inst[i];
+    if(!map[r.cli]) map[r.cli] = {cli:r.cli, type:r.type, label:r.label, buyV:0, sellV:0, netV:0, stocks:new Set(), deals:0};
+    var c = map[r.cli];
+    c.stocks.add(r.sym);
+    c.deals++;
+    if(r.side === 'BUY') c.buyV += r.val;
+    else if(r.side === 'SELL') c.sellV += r.val;
+    c.netV = c.buyV - c.sellV;
+  }
+  ST.clients = Object.keys(map).map(function(k){
+    var c = map[k];
+    return {cli:c.cli, type:c.type, label:c.label, buyV:c.buyV, sellV:c.sellV, netV:c.netV, stockCount:c.stocks.size, dealCount:c.deals};
+  }).sort(function(a,b){ return b.buyV - a.buyV; });
+}
+
+function buildSectors(){
+  var set = new Set();
+  ST.stocks.forEach(function(s){ if(s.sector && s.sector !== 'Other') set.add(s.sector); });
+  var secs = Array.from(set).sort();
+  var opts = '<option value="all">All Sectors</option>' + secs.map(function(x){ return '<option value="' + esc(x) + '">' + esc(x) + '</option>'; }).join('');
+  var el1 = document.getElementById('fSec'); if(el1) el1.innerHTML = opts;
+  var el2 = document.getElementById('fSecI'); if(el2) el2.innerHTML = opts;
+  var el3 = document.getElementById('fSecD'); if(el3) el3.innerHTML = opts;
+}
+
+function getContestedStocks(){
+  return ST.stocks.filter(function(s){ return s.buyers >= 2 && s.sellers >= 2; })
+    .sort(function(a, b){ return (b.buyers + b.sellers) - (a.buyers + a.sellers); });
+}
+
+function getConsensusBuys(){
+  return ST.stocks.filter(function(s){ return s.buyers >= 3; })
+    .sort(function(a, b){ return b.buyers - a.buyers || b.buyV - a.buyV; });
+}
+
+function getWatchlistStocks(){
+  return ST.stocks.filter(function(s){ return WL.has(s.sym); })
+    .sort(function(a, b){
+      var d = Math.abs(b.netV) - Math.abs(a.netV);
+      if(d !== 0) return d;
+      return a.sym.localeCompare(b.sym);
+    });
+}
+
+function getStocksWithBuys(){
+  return ST.stocks.filter(function(s){ return s.buyers > 0; })
+    .sort(function(a, b){ return b.buyV - a.buyV; });
+}
+
+function getStocksWithSells(){
+  return ST.stocks.filter(function(s){ return s.sellers > 0; })
+    .sort(function(a, b){ return b.sellV - a.sellV; });
+}
+
+function getSectorSummary(){
+  var map = {};
+  ST.stocks.forEach(function(s){
+    var key = s.sector || 'Other';
+    if(!map[key]) map[key] = {sector:key, count:0, buyV:0, sellV:0, netV:0};
+    map[key].count++;
+    map[key].buyV += s.buyV;
+    map[key].sellV += s.sellV;
+    map[key].netV += s.netV;
+  });
+  var arr = Object.keys(map).map(function(k){ return map[k]; });
+  arr.sort(function(a, b){ return Math.abs(b.netV) - Math.abs(a.netV); });
+  return arr;
+}
+
+function updateSectorStrip(){
+  var chipsEl = document.getElementById('sectorChips');
+  if(!chipsEl) return;
+  var summary = getSectorSummary();
+  if(!summary.length){ chipsEl.innerHTML = ''; return; }
+  chipsEl.innerHTML = summary.map(function(x){
+    var isOn = (ST.frontSec === x.sector);
+    var flowCls = x.netV >= 0 ? 'p' : 'n';
+    var flowSign = x.netV >= 0 ? '+' : '−';
+    return '<button class="sector-chip' + (isOn ? ' on' : '') + '" data-sec="' + esc(x.sector) + '" title="' +
+      esc(x.sector) + ': ' + x.count + ' stock' + (x.count>1?'s':'') + ' · Buy ₹' + fmtCr(x.buyV) + ' · Sell ₹' + fmtCr(x.sellV) + ' · Net ' + flowSign + '₹' + fmtCr(Math.abs(x.netV)) +
+      ' — click to filter the front page">' +
+      '<span class="s-name">' + esc(x.sector) + '</span>' +
+      '<span class="s-count">' + x.count + '</span>' +
+      '<span class="s-flow ' + flowCls + '">' + flowSign + '₹' + fmtCr(Math.abs(x.netV)) + '</span>' +
+    '</button>';
+  }).join('');
+  chipsEl.querySelectorAll('.sector-chip').forEach(function(el){
+    el.addEventListener('click', function(){
+      var sec = el.dataset.sec;
+      if(ST.frontSec === sec){
+        ST.frontSec = 'all';
+      } else {
+        ST.frontSec = sec;
+      }
+      updateSectorStrip();
+      renderFrontPage();
+    });
+  });
+}
+
+function updateConsensusKPIs(){
+  var contested = getContestedStocks();
+  var consensus = getConsensusBuys();
+  var a = document.getElementById('kpiCommonCliV'); if(a) a.textContent = contested.length;
+  var b = document.getElementById('kpiBuyCommonCliV'); if(b) b.textContent = consensus.length;
+  var c = document.getElementById('kpiCommonDelV'); if(c) c.textContent = contested.length;
+  var d = document.getElementById('kpiBuyCommonDelV'); if(d) d.textContent = consensus.length;
+  var wl = document.getElementById('kpiWatchlistV'); if(wl) wl.textContent = WL.size;
+}
+
+var FRONT_LIMIT = 10;
+
+function getTopBullishStocks(){
+  return ST.insights
+    .filter(function(i){
+      if(ST.frontSec !== 'all' && i.sector !== ST.frontSec) return false;
+      return i.signal === 'bull';
+    })
+    .sort(function(a, b){
+      var as = a.dayChg === null ? 0 : (a.dayChg <= -15 ? -2 : (a.dayChg <= -5 ? -1 : 0));
+      var bs = b.dayChg === null ? 0 : (b.dayChg <= -15 ? -2 : (b.dayChg <= -5 ? -1 : 0));
+      if(as !== bs) return as - bs;
+      return b.netV - a.netV;
+    })
+    .slice(0, FRONT_LIMIT);
+}
+
+function getTopBearishStocks(){
+  return ST.insights
+    .filter(function(i){
+      if(ST.frontSec !== 'all' && i.sector !== ST.frontSec) return false;
+      return i.signal === 'bear';
+    })
+    .sort(function(a, b){
+      var as = a.dayChg === null ? 0 : (a.dayChg <= -15 ? -2 : (a.dayChg <= -5 ? -1 : 0));
+      var bs = b.dayChg === null ? 0 : (b.dayChg <= -15 ? -2 : (b.dayChg <= -5 ? -1 : 0));
+      if(as !== bs) return as - bs;
+      return a.netV - b.netV;
+    })
+    .slice(0, FRONT_LIMIT);
+}
+
+function renderFrontPage(){
+  var bulls = getTopBullishStocks();
+  var bears = getTopBearishStocks();
+
+  var secLabel = ST.frontSec === 'all' ? 'All sectors' : ST.frontSec;
+  var totalBull = ST.insights.filter(function(i){
+    if(ST.frontSec !== 'all' && i.sector !== ST.frontSec) return false;
+    return i.signal === 'bull';
+  }).length;
+  var totalBear = ST.insights.filter(function(i){
+    if(ST.frontSec !== 'all' && i.sector !== ST.frontSec) return false;
+    return i.signal === 'bear';
+  }).length;
+
+  var fl = document.getElementById('frontLine');
+  if(fl) fl.innerHTML =
+    '<strong>' + esc(secLabel) + '</strong> · ' +
+    'showing top <strong>' + bulls.length + '</strong> of <strong>' + totalBull + '</strong> bullish' +
+    ' and top <strong>' + bears.length + '</strong> of <strong>' + totalBear + '</strong> bearish stocks' +
+    ' — use Stock Summary to see the full list';
+
+  var bc = document.getElementById('bullCount'); if(bc) bc.textContent = bulls.length + ' shown';
+  var brc = document.getElementById('bearCount'); if(brc) brc.textContent = bears.length + ' shown';
+
+  var bl = document.getElementById('bullList');
+  if(bl) bl.innerHTML = bulls.length
+    ? bulls.map(renderInsightCard).join('')
+    : '<div class="em" style="padding:40px 20px"><h4>No bullish stocks match</h4><p>Try clearing the sector filter.</p></div>';
+  var brl = document.getElementById('bearList');
+  if(brl) brl.innerHTML = bears.length
+    ? bears.map(renderInsightCard).join('')
+    : '<div class="em" style="padding:40px 20px"><h4>No bearish stocks match</h4><p>Try clearing the sector filter.</p></div>';
+}
+
+function renderInsightCard(i){
+  var cls = i.signal;
+  var hasCrash = i.dayChg !== null && i.dayChg <= -5;
+  var cardCls = hasCrash ? cls + ' has-crash' : cls;
+  var sigLabel = i.signal === 'bull' ? '🟢 BULLISH' : i.signal === 'bear' ? '🔴 BEARISH' : '🟡 MIXED';
+  var sigTitle = i.signal === 'bull' ? 'Bullish: Net inflow of institutional capital.' : i.signal === 'bear' ? 'Bearish: Net outflow of institutional capital.' : 'Mixed: Institutions are buying and selling aggressively at the same time.';
+  var sigWarn = '';
+  if(i.dayChg !== null){
+    if(i.dayChg <= -15){ sigLabel = '🚨 ' + sigLabel + ' ⚠️'; sigWarn = ' w'; sigTitle += ' Warning: Stock crashed over 15%.'; }
+    else if(i.dayChg <= -5){ sigLabel = '⚠️ ' + sigLabel; sigWarn = ' w'; sigTitle += ' Warning: Stock fell over 5%.'; }
+    else if(i.dayChg >= 10){ sigLabel = sigLabel + ' 🚀'; sigTitle += ' Notice: Stock rallied over 10%.'; }
+  }
+  var isW = WL.has(i.sym);
+  var wCls = isW ? 'wb on' : 'wb';
+  var wIcon = isW ? '★' : '☆';
+  var wLabel = isW ? 'Watching' : 'Watch';
+
+  var flagsHtml = i.flags.map(function(f){
+    var m = FLAG_META[f]; if(!m) return '';
+    var tips = {
+      crash: "Sharp Decline: Stock crashed on the day institutions bought.",
+      knife: "Falling Knife: Stock dropped over 5 percent while institutions bought.",
+      squeeze: "Sharp Rally: Stock surged over 10 percent on the day institutions bought.",
+      repeat: "Repeat Buyer: The same institution bought this stock on 3 or more separate days.",
+      consensus: "Consensus: Broad agreement. 3 or more distinct institutions bought this stock.",
+      aggressive: "Aggressive: Institutions bought on 3 or more different sessions.",
+      chasing: "Chasing: Institutions bought at a higher price than their first purchase.",
+      averaging: "Averaging: Institutions bought at a lower price than their first purchase.",
+      fresh: "Fresh: First institutional activity was within the last 7 days.",
+      cooling: "Cooling: No new buying for over 10 days, and not currently chasing or aggressive.",
+      mixed: "Mixed: 2 or more institutions bought AND 2 or more institutions sold. They are fighting each other.",
+      watchlist: "Watchlist: You have starred this stock."
+    };
+    return '<span class="fl ' + f + '" title="' + tips[f] + '">' + m.i + ' ' + m.l + '</span>';
+  }).join(' ');
+
+  var instList = i.rows.slice(0,4).map(function(r){
+    return '<div class="ir"><span class="nm">' + esc(r.cli) + ' <span class="dt">' + r.date + '</span></span><span class="qt ' + (r.side==='BUY'?'p':'n') + '">' + (r.side==='BUY'?'+':'-') + '₹' + fmtCr(r.val) + '</span></div>';
+  }).join('');
+  var more = i.rows.length > 4 ? '<div class="ir mu" style="cursor:pointer;color:var(--b)" onclick="openStock(\'' + esc(i.sym) + '\')">+ ' + (i.rows.length-4) + ' more — click to see all →</div>' : '';
+
+  var retBlock = '';
+  if(i.ltp > 0 && i.vwap > 0){
+    var sign = i.retPct >= 0 ? '+' : '';
+    var absClass = (i.buyPnlAbs != null && i.buyPnlAbs >= 0) ? 'p' : 'n';
+    var absText = i.buyPnlAbs != null ? fmtCrSigned(i.buyPnlAbs) : '—';
+    retBlock = '<div class="tp" style="grid-template-columns:repeat(4,1fr);background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.2);margin-bottom:10px">' +
+      '<div class="tpi"><div class="tpi-l" title="The weighted average price institutions paid.">Inst VWAP</div><div class="tpi-v">₹' + i.vwap.toFixed(2) + '</div></div>' +
+      '<div class="tpi"><div class="tpi-l" title="Current market price you entered.">LTP</div><div class="tpi-v">₹' + i.ltp.toFixed(2) + '</div></div>' +
+      '<div class="tpi"><div class="tpi-l" title="How much institutions are up or down by percentage.">Inst P&L</div><div class="tpi-v ' + (i.retPct>=0?'p':'n') + '">' + sign + i.retPct.toFixed(2) + '%</div></div>' +
+      '<div class="tpi"><div class="tpi-l" title="Absolute rupee value of their profit or loss.">P&L (₹)</div><div class="tpi-v ' + absClass + '">' + absText + '</div></div>' +
+      '</div>';
+  }
+
+  var firstDateLabel = i.fBuyD ? fmtD(i.fBuyD) : (i.fSellD ? fmtD(i.fSellD) + ' <span class="mu" style="font-size:10px">(sell)</span>' : '—');
+
+  return '<div class="card ' + cardCls + '">' +
+    '<div class="ch"><div>' +
+      '<div class="cs" onclick="openStock(\'' + esc(i.sym) + '\')" title="Click to open full details for ' + esc(i.sym) + '.">' + esc(i.sym) + ' <span class="sect" title="Sector: ' + esc(i.sector) + '">' + esc(i.sector) + '</span></div>' +
+      '<div class="cn">' + esc(i.name) + '</div>' +
+    '</div><div class="cs2">' +
+      '<div class="sig ' + cls + sigWarn + '" title="' + sigTitle + '">' + sigLabel + '</div>' +
+      '<button class="' + wCls + '" onclick="toggleWLUI(\'' + esc(i.sym) + '\');renderFrontPage();updateConsensusKPIs();" title="Click to toggle watchlist."><span class="star-icon">' + wIcon + '</span> ' + wLabel + '</button>' +
+    '</div></div>' +
+    (i.warn || '') +
+    (flagsHtml ? '<div style="margin-bottom:10px">' + flagsHtml + '</div>' : '') +
+    '<div class="cbody">' + i.narr + '</div>' +
+    '<div class="ctl">' +
+      '<span title="Date of the first institutional action.">Started: <strong>' + firstDateLabel + '</strong></span>' +
+      '<span title="Date of the most recent institutional action.">Latest: <strong>' + (i.lBuyD ? fmtD(i.lBuyD) : (i.lSellD ? fmtD(i.lSellD) : '—')) + '</strong></span>' +
+      '<span title="Days elapsed since the first activity.">Held: <strong>' + i.daysHeld + ' days</strong></span>' +
+      (i.dayChg !== null ? '<span title="Today\'s price change percentage.">Day: <strong class="' + (i.dayChg>=0?'p':'n') + '">' + (i.dayChg>=0?'+':'') + i.dayChg.toFixed(2) + '%</strong></span>' : '') +
+    '</div>' +
+    (i.vwap > 0 ?
+      retBlock +
+      '<div class="tp">' +
+        '<div class="tpi"><div class="tpi-l" title="Net institutional Buy Value minus Sell Value.">Net Flow</div><div class="tpi-v ' + (i.netV>=0?'p':'n') + '">' + (i.netV>=0?'+':'') + '₹' + fmtCr(Math.abs(i.netV)) + '</div></div>' +
+        '<div class="tpi"><div class="tpi-l" title="Number of distinct days institutions bought this stock.">Accum Days</div><div class="tpi-v">' + i.accumDays + '</div></div>' +
+        '<div class="tpi"><div class="tpi-l" title="Number of distinct institutions buying vs selling.">Institutions</div><div class="tpi-v">' + i.buyers + '↑ / ' + i.sellers + '↓</div></div>' +
+      '</div>' : '') +
+    '<div class="il">' + instList + more + '</div>' +
+  '</div>';
+}
+
+function openInstListModal(mode){
+  var isBuys = mode === 'buys';
+  var list = isBuys ? getStocksWithBuys() : getStocksWithSells();
+  var title = isBuys ? '🟢 Stocks with Institutional Buys' : '🔴 Stocks with Institutional Sells';
+  var subtitle = isBuys
+    ? 'Every stock where at least one institution bought. Sorted by total buy value (highest first). Click any name to open details.'
+    : 'Every stock where at least one institution sold. Sorted by total sell value (highest first). Click any name to open details.';
+  var accent = isBuys ? 'var(--g)' : 'var(--r)';
+  var accentBg = isBuys ? 'var(--gb)' : 'var(--rb)';
+
+  var overlay = document.createElement('div');
+  overlay.className = 'ov';
+  var drawer = document.createElement('div');
+  drawer.className = 'dw';
+  drawer.style.zIndex = '10000';
+
+  var html = '<button class="dw-close">✕</button>' +
+    '<h3>' + title + ' <span class="bc" style="background:' + accentBg + ';color:' + accent + ';padding:2px 10px;border-radius:10px;font-size:12px">' + list.length + '</span></h3>' +
+    '<div class="sub">' + esc(subtitle) + '</div>';
+
+  if(!list.length){
+    html += '<p class="mu" style="font-size:13px;padding:20px 0">No stocks match.</p>';
+  } else {
+    html += '<div class="namelist">';
+    list.forEach(function(s){
+      html += '<div class="namelist-item" onclick="closeAllDrawers();openStock(\'' + esc(s.sym) + '\')" title="Click to open details for ' + esc(s.sym) + '.">' +
+        '<div>' +
+          '<div class="sym">' + esc(s.sym) + '</div>' +
+          '<div class="sym-n">' + esc(s.name || '—') + '</div>' +
+        '</div>' +
+        '<div class="meta">' + esc(s.sector) + ' <span class="arr">→</span></div>' +
+      '</div>';
+    });
+    html += '</div>';
+  }
+
+  drawer.innerHTML = html;
+  document.body.appendChild(overlay);
+  document.body.appendChild(drawer);
+  var close = function(){ overlay.remove(); drawer.remove(); };
+  drawer.querySelector('.dw-close').addEventListener('click', close);
+  overlay.addEventListener('click', close);
+}
+
+function closeAllDrawers(){
+  document.querySelectorAll('.dw, .ov').forEach(function(el){ el.remove(); });
+}
+
+function openConsensusModal(mode){
+  var list = mode === 'consensus' ? getConsensusBuys() : getContestedStocks();
+  var title = mode === 'consensus' ? '🏆 Consensus Buys — 3+ institutions' : '🤝 Contested Stocks — 2+ buyers & 2+ sellers';
+  var subtitle = mode === 'consensus'
+    ? 'Stocks where three or more distinct institutions accumulated a position. Broad institutional interest.'
+    : 'Stocks where institutions are on BOTH sides — some accumulating, some distributing. High-conviction disagreement.';
+
+  var overlay = document.createElement('div');
+  overlay.className = 'ov';
+  var drawer = document.createElement('div');
+  drawer.className = 'dw';
+  drawer.style.zIndex = '10000';
+
+  var html = '<button class="dw-close">✕</button>' +
+    '<h3>' + title + ' <span class="bc" style="background:var(--bb);color:var(--b);padding:2px 10px;border-radius:10px;font-size:12px">' + list.length + '</span></h3>' +
+    '<div class="sub">' + esc(subtitle) + '</div>';
+
+  if(!list.length){
+    html += '<p class="mu" style="font-size:13px;padding:20px 0">No stocks match this criterion in the current dataset.</p>';
+  } else {
+    list.forEach(function(s){
+      var ins = ST.insights.find(function(x){ return x.sym === s.sym; });
+      var sigLabel = ins ? (ins.signal === 'bull' ? '🟢 BULLISH' : ins.signal === 'bear' ? '🔴 BEARISH' : '🟡 MIXED') : (s.netV > 0 ? '🟢 BULLISH' : s.netV < 0 ? '🔴 BEARISH' : '🟡 MIXED');
+
+      var buyerRows = {};
+      var sellerRows = {};
+      s.rows.forEach(function(r){
+        var bucket = r.side === 'BUY' ? buyerRows : sellerRows;
+        if(!bucket[r.cli]) bucket[r.cli] = {cli:r.cli, type:r.type, label:r.label, val:0, qty:0, deals:0};
+        bucket[r.cli].val += r.val;
+        bucket[r.cli].qty += r.qty;
+        bucket[r.cli].deals++;
+      });
+      var buyers = Object.keys(buyerRows).map(function(k){ return buyerRows[k]; }).sort(function(x, y){ return y.val - x.val; });
+      var sellers = Object.keys(sellerRows).map(function(k){ return sellerRows[k]; }).sort(function(x, y){ return y.val - x.val; });
+
+      html += '<div style="background:var(--p2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:12px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">' +
+          '<div>' +
+            '<span class="sym" style="font-size:16px" onclick="openStock(\'' + esc(s.sym) + '\')">' + esc(s.sym) + '</span>' +
+            ' <span class="sect">' + esc(s.sector) + '</span>' +
+            '<div class="sym-n" style="margin-top:2px">' + esc(s.name) + '</div>' +
+          '</div>' +
+          '<div style="text-align:right">' +
+            '<span class="sig ' + (ins ? ins.signal : 'mx') + '">' + sigLabel + '</span>' +
+            '<div style="font-size:11px;color:var(--mu);margin-top:4px">' +
+              '<span class="p">' + s.buyers + '↑</span> / <span class="n">' + s.sellers + '↓</span>' +
+              ' · Net <strong class="' + (s.netV>=0?'p':'n') + '">' + (s.netV>=0?'+':'') + '₹' + fmtCr(Math.abs(s.netV)) + '</strong>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<table style="font-size:12px"><thead><tr>' +
+          '<th>Institution</th><th>Type</th><th>Side</th><th style="text-align:right">Value</th><th style="text-align:center">Deals</th>' +
+        '</tr></thead><tbody>' +
+          buyers.map(function(b){
+            return '<tr><td><span class="clk" onclick="openClient(\'' + esc(b.cli) + '\')">' + esc(b.cli) + '</span></td>' +
+              '<td><span class="tag ' + b.type.toLowerCase() + '">' + b.label + '</span></td>' +
+              '<td><span class="p">BUY</span></td>' +
+              '<td style="text-align:right" class="p">₹' + fmtCr(b.val) + '</td>' +
+              '<td style="text-align:center">' + b.deals + '</td></tr>';
+          }).join('') +
+          sellers.map(function(b){
+            return '<tr><td><span class="clk" onclick="openClient(\'' + esc(b.cli) + '\')">' + esc(b.cli) + '</span></td>' +
+              '<td><span class="tag ' + b.type.toLowerCase() + '">' + b.label + '</span></td>' +
+              '<td><span class="n">SELL</span></td>' +
+              '<td style="text-align:right" class="n">₹' + fmtCr(b.val) + '</td>' +
+              '<td style="text-align:center">' + b.deals + '</td></tr>';
+          }).join('') +
+        '</tbody></table>' +
+      '</div>';
+    });
+  }
+
+  drawer.innerHTML = html;
+  document.body.appendChild(overlay);
+  document.body.appendChild(drawer);
+  var close = function(){ overlay.remove(); drawer.remove(); };
+  drawer.querySelector('.dw-close').addEventListener('click', close);
+  overlay.addEventListener('click', close);
+}
+
+function openWatchlistModal(){
+  var list = getWatchlistStocks();
+
+  var overlay = document.createElement('div');
+  overlay.className = 'ov';
+  var drawer = document.createElement('div');
+  drawer.className = 'dw';
+  drawer.style.zIndex = '10000';
+
+  var html = '<button class="dw-close">✕</button>' +
+    '<h3>⭐ Watchlist <span class="bc" style="background:var(--ab);color:var(--a);padding:2px 10px;border-radius:10px;font-size:12px">' + list.length + '</span></h3>' +
+    '<div class="sub">Stocks you have starred. Click any symbol for full buyer/seller details, or click ⭐ to remove.</div>';
+
+  if(!list.length){
+    html += '<div style="background:var(--p2);border:1px dashed var(--bd);border-radius:10px;padding:24px;text-align:center;font-size:13px;color:var(--mu)">' +
+      '<div style="font-size:36px;margin-bottom:10px">⭐</div>' +
+      '<div style="color:var(--tx);font-weight:600;margin-bottom:6px">Your watchlist is empty</div>' +
+      'Go to <strong>Stock Summary</strong> and click <strong>☆ Watch</strong> next to any stock to add it here.' +
+    '</div>';
+  } else {
+    list.forEach(function(s){
+      var ins = ST.insights.find(function(x){ return x.sym === s.sym; });
+      var sigLabel = ins ? (ins.signal === 'bull' ? '🟢 BULLISH' : ins.signal === 'bear' ? '🔴 BEARISH' : '🟡 MIXED') : (s.netV > 0 ? '🟢 BULLISH' : s.netV < 0 ? '🔴 BEARISH' : '🟡 MIXED');
+
+      var buyerRows = {};
+      var sellerRows = {};
+      s.rows.forEach(function(r){
+        var bucket = r.side === 'BUY' ? buyerRows : sellerRows;
+        if(!bucket[r.cli]) bucket[r.cli] = {cli:r.cli, type:r.type, label:r.label, val:0, qty:0, deals:0};
+        bucket[r.cli].val += r.val;
+        bucket[r.cli].qty += r.qty;
+        bucket[r.cli].deals++;
+      });
+      var buyers = Object.keys(buyerRows).map(function(k){ return buyerRows[k]; }).sort(function(x, y){ return y.val - x.val; });
+      var sellers = Object.keys(sellerRows).map(function(k){ return sellerRows[k]; }).sort(function(x, y){ return y.val - x.val; });
+
+      var retBit = '';
+      if(s.retPct != null){
+        var rc = s.retPct >= 0 ? 'p' : 'n';
+        var rs = s.retPct >= 0 ? '+' : '';
+        retBit = ' · Ret <strong class="' + rc + '">' + rs + s.retPct.toFixed(2) + '%</strong>';
+      }
+      var dayBit = '';
+      if(s.dayChg != null){
+        var dc = s.dayChg >= 0 ? 'p' : 'n';
+        var dsig = s.dayChg >= 0 ? '+' : '';
+        dayBit = ' · Day <strong class="' + dc + '">' + dsig + s.dayChg.toFixed(2) + '%</strong>';
+      }
+
+      html += '<div style="background:var(--p2);border:1px solid var(--bd);border-radius:10px;padding:14px;margin-bottom:12px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap">' +
+          '<div>' +
+            '<span class="sym" style="font-size:16px" onclick="openStock(\'' + esc(s.sym) + '\')">' + esc(s.sym) + '</span>' +
+            ' <span class="sect">' + esc(s.sector) + '</span>' +
+            '<div class="sym-n" style="margin-top:2px">' + esc(s.name) + '</div>' +
+          '</div>' +
+          '<div style="text-align:right">' +
+            '<span class="sig ' + (ins ? ins.signal : 'mx') + '">' + sigLabel + '</span>' +
+            '<div style="font-size:11px;color:var(--mu);margin-top:4px">' +
+              '<span class="p">' + s.buyers + '↑</span> / <span class="n">' + s.sellers + '↓</span>' +
+              ' · Net <strong class="' + (s.netV>=0?'p':'n') + '">' + (s.netV>=0?'+':'') + '₹' + fmtCr(Math.abs(s.netV)) + '</strong>' +
+              retBit + dayBit +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">' +
+          '<button class="wb on" onclick="watchlistToggleFromModal(\'' + esc(s.sym) + '\')"><span class="star-icon">★</span> Remove from Watchlist</button>' +
+          '<button class="wb" onclick="openStock(\'' + esc(s.sym) + '\')">Open details →</button>' +
+        '</div>' +
+        '<table style="font-size:12px"><thead><tr>' +
+          '<th>Institution</th><th>Type</th><th>Side</th><th style="text-align:right">Value</th><th style="text-align:center">Deals</th>' +
+        '</tr></thead><tbody>' +
+          buyers.map(function(b){
+            return '<tr><td><span class="clk" onclick="openClient(\'' + esc(b.cli) + '\')">' + esc(b.cli) + '</span></td>' +
+              '<td><span class="tag ' + b.type.toLowerCase() + '">' + b.label + '</span></td>' +
+              '<td><span class="p">BUY</span></td>' +
+              '<td style="text-align:right" class="p">₹' + fmtCr(b.val) + '</td>' +
+              '<td style="text-align:center">' + b.deals + '</td></tr>';
+          }).join('') +
+          sellers.map(function(b){
+            return '<tr><td><span class="clk" onclick="openClient(\'' + esc(b.cli) + '\')">' + esc(b.cli) + '</span></td>' +
+              '<td><span class="tag ' + b.type.toLowerCase() + '">' + b.label + '</span></td>' +
+              '<td><span class="n">SELL</span></td>' +
+              '<td style="text-align:right" class="n">₹' + fmtCr(b.val) + '</td>' +
+              '<td style="text-align:center">' + b.deals + '</td></tr>';
+          }).join('') +
+        '</tbody></table>' +
+      '</div>';
+    });
+  }
+
+  drawer.innerHTML = html;
+  document.body.appendChild(overlay);
+  document.body.appendChild(drawer);
+  var close = function(){ overlay.remove(); drawer.remove(); };
+  drawer.querySelector('.dw-close').addEventListener('click', close);
+  overlay.addEventListener('click', close);
+}
+
+function watchlistToggleFromModal(sym){
+  toggleWL(sym);
+  updateConsensusKPIs();
+  renderStocks();
+  renderFrontPage();
+  document.querySelectorAll('.dw, .ov').forEach(function(el){ el.remove(); });
+  openWatchlistModal();
+}
+
+function render(){
+  document.getElementById('sTot').textContent = fmtN(ST.all.length);
+  document.getElementById('sNoi').textContent = fmtN(ST.noise.length);
+  document.getElementById('sB').textContent = fmtN(ST.inst.filter(function(r){ return r.side === 'BUY'; }).length);
+  document.getElementById('sS').textContent = fmtN(ST.inst.filter(function(r){ return r.side === 'SELL'; }).length);
+  var knives = ST.stocks.filter(function(s){ return s.dayChg !== null && s.dayChg <= -5; }).length;
+  document.getElementById('sK').textContent = knives > 0 ? fmtN(knives) : '0';
+
+  renderFrontPage();
+  renderStocks();
+  renderClients();
+  renderDeals();
+  renderNoise();
+  updateConsensusKPIs();
+  updateSectorStrip();
+}
+
+function getFilteredStocks(){
+  var q = ST.aSrch.toLowerCase();
+  return ST.stocks.filter(function(s){
+    if(ST.aSig === 'bull' && s.netV <= 0) return false;
+    if(ST.aSig === 'bear' && s.netV >= 0) return false;
+    if(ST.aSig === 'mixed' && s.netV !== 0) return false;
+    if(ST.aInst !== 'all' && s.typeList.indexOf(ST.aInst) < 0) return false;
+    if(ST.aSec !== 'all' && s.sector !== ST.aSec) return false;
+    if(ST.aCon !== 'all'){
+      var ins = ST.insights.find(function(x){ return x.sym === s.sym; });
+      if(!ins || ins.conviction !== ST.aCon) return false;
+    }
+    if(ST.aFlag !== 'all'){
+      if(ST.aFlag === 'watchlist'){ if(!WL.has(s.sym)) return false; }
+      else if(s.flags.indexOf(ST.aFlag) < 0) return false;
+    }
+    if(q){
+      var hay = (s.sym + ' ' + s.name + ' ' + s.sector + ' ' + s.buyerList.join(' ') + ' ' + s.sellerList.join(' ')).toLowerCase();
+      if(hay.indexOf(q) < 0) return false;
+    }
+    return true;
+  });
+}
+
+function sortStocks(list){
+  var k = ST.sKey, d = ST.sDir === 'asc' ? 1 : -1;
+  return list.slice().sort(function(a, b){
+    var va = a[k], vb = b[k];
+    if(k === 'signal'){
+      va = a.netV > 0 ? 3 : a.netV < 0 ? 1 : 2;
+      vb = b.netV > 0 ? 3 : b.netV < 0 ? 1 : 2;
+    }
+    if(k === 'firstBuyDate'){
+      va = a.fBuyD ? a.fBuyD.getTime() : (a.fSellD ? a.fSellD.getTime() : 0);
+      vb = b.fBuyD ? b.fBuyD.getTime() : (b.fSellD ? b.fSellD.getTime() : 0);
+    }
+    if(k === 'returnPct'){ va = a.retPct == null ? -9999 : a.retPct; vb = b.retPct == null ? -9999 : b.retPct; }
+    if(k === 'dayChange'){ va = a.dayChg == null ? -9999 : a.dayChg; vb = b.dayChg == null ? -9999 : b.dayChg; }
+    if(typeof va === 'string') return va.localeCompare(vb) * d;
+    return ((va||0) - (vb||0)) * d;
+  });
+}
+
+function renderStocks(){
+  var tbody = document.querySelector('#stk tbody');
+  var list = sortStocks(getFilteredStocks());
+
+  document.querySelectorAll('#stk th.so').forEach(function(th){
+    th.classList.remove('sa','sd','ca');
+    if(th.dataset.sort === ST.sKey) th.classList.add(ST.sDir === 'asc' ? 'sa' : 'sd', 'ca');
+  });
+
+  document.getElementById('ri').innerHTML = 'Showing <strong>' + list.length + '</strong> of ' + ST.stocks.length + ' stocks · click any stock name for full buyer/seller list';
+
+  if(!list.length){
+    tbody.innerHTML = '<tr><td colspan="14"><div class="em"><h4>No stocks match</h4><p>Try removing filters.</p><button onclick="clearAll()">↺ Reset All Filters</button></div></td></tr>';
+    renderActiveFilters();
+    return;
+  }
+
+  tbody.innerHTML = list.map(function(s){
+    var cls = s.netV > 0 ? 'bull' : s.netV < 0 ? 'bear' : 'mx';
+    var label = s.netV > 0 ? '🟢 BULLISH' : s.netV < 0 ? '🔴 BEARISH' : '🟡 MIXED';
+    var titleText = s.netV > 0 ? 'Bullish: Net inflow of capital.' : s.netV < 0 ? 'Bearish: Net outflow of capital.' : 'Mixed: Institutions are fighting.';
+    var rowCls = '';
+    if(s.dayChg !== null){
+      if(s.dayChg <= -15){ label = '🚨 ' + label + ' ⚠️'; rowCls = 'cr'; titleText += ' WARNING: Sharp decline.'; }
+      else if(s.dayChg <= -5){ label = '⚠️ ' + label; rowCls = 'kn'; titleText += ' WARNING: Falling knife.'; }
+      else if(s.dayChg >= 10){ label = label + ' 🚀'; titleText += ' NOTICE: Sharp rally.'; }
+    }
+    var daysPill = s.daysHeld > 0 ? '<span class="dp ' + (s.daysHeld <= 7 ? 'f' : s.daysHeld > 30 ? 'o' : '') + '">' + s.daysHeld + 'd</span>' : '<span class="mu">—</span>';
+
+    var firstBuyCell;
+    if(s.buyers > 0 && s.fBuyD){
+      firstBuyCell = '<span class="mu">' + fmtD(s.fBuyD) + '</span>';
+    } else if(s.buyers === 0 && s.sellers > 0){
+      firstBuyCell = dash('No institutional buyers — this is a sell-only stock.');
+    } else {
+      firstBuyCell = '<span class="mu">—</span>';
+    }
+
+    var vwapCell;
+    if(s.buyers > 0 && s.vwap > 0){
+      vwapCell = '₹' + s.vwap.toFixed(2);
+    } else if(s.buyers === 0 && s.sellers > 0){
+      vwapCell = dash('No institutional buyers — buy-side VWAP cannot be calculated.');
+    } else {
+      vwapCell = '<span class="mu">—</span>';
+    }
+
+    var ltpVal = s.ltp > 0 ? s.ltp.toFixed(2) : '';
+    var ltpCls = s.ltp > 0 ? 'li f' : 'li';
+    var dcVal = s.dayChg !== null ? s.dayChg.toFixed(2) : '';
+    var dcCls = 'di';
+    if(s.dayChg !== null){
+      if(s.dayChg <= -15) dcCls = 'di c';
+      else if(s.dayChg < 0) dcCls = 'di d';
+      else if(s.dayChg > 0) dcCls = 'di u';
+    }
+    var isW = WL.has(s.sym);
+    var wCls = isW ? 'wb on' : 'wb';
+    var wIcon = isW ? '★' : '☆';
+    var wLabel = isW ? 'Watching' : 'Watch';
+    var retHtml = '<span class="mu">—</span>';
+    if(s.retPct != null){
+      var rc = s.retPct >= 0 ? 'u' : 'd';
+      var sign = s.retPct >= 0 ? '+' : '';
+      retHtml = '<span class="rp ' + rc + '">' + sign + s.retPct.toFixed(2) + '%</span>';
+    }
+    var flagsHtml = s.flags.map(function(f){
+      var m = FLAG_META[f]; if(!m) return '';
+      var tips = {
+        crash: "Sharp Decline: Stock crashed on the day institutions bought.",
+        knife: "Falling Knife: Stock dropped over 5 percent while institutions bought.",
+        squeeze: "Sharp Rally: Stock surged over 10 percent on the day institutions bought.",
+        repeat: "Repeat Buyer: The same institution bought this stock on 3 or more separate days.",
+        consensus: "Consensus: Broad agreement. 3 or more distinct institutions bought this stock.",
+        aggressive: "Aggressive: Institutions bought on 3 or more different sessions.",
+        chasing: "Chasing: Institutions bought at a higher price than their first purchase.",
+        averaging: "Averaging: Institutions bought at a lower price than their first purchase.",
+        fresh: "Fresh: First institutional activity was within the last 7 days.",
+        cooling: "Cooling: No new buying for over 10 days, and not currently chasing or aggressive.",
+        mixed: "Mixed: 2 or more institutions bought AND 2 or more institutions sold. They are fighting each other.",
+        watchlist: "Watchlist: You have starred this stock."
+      };
+      return '<span class="fl ' + f + '" title="' + tips[f] + '">' + m.i + ' ' + m.l + '</span>';
+    }).join(' ');
+
+    return '<tr class="' + rowCls + '">' +
+      '<td style="text-align:center;width:96px"><button class="' + wCls + '" onclick="toggleWLUI(\'' + esc(s.sym) + '\');renderStocks();renderFrontPage();updateConsensusKPIs();" title="Toggle Watchlist"> ' + wIcon + ' ' + wLabel + '</button></td>' +
+      '<td><span class="sym" onclick="openStock(\'' + esc(s.sym) + '\')">' + esc(s.sym) + '</span><div class="sym-n">' + esc(s.name) + '</div></td>' +
+      '<td style="text-align:center"><span class="sect">' + esc(s.sector) + '</span></td>' +
+      '<td style="text-align:center;font-size:12px">' + firstBuyCell + '</td>' +
+      '<td style="text-align:center">' + daysPill + '</td>' +
+      '<td style="text-align:right">' + vwapCell + '</td>' +
+      '<td style="text-align:right"><input type="number" step="0.01" class="' + ltpCls + '" data-sym="' + esc(s.sym) + '" value="' + ltpVal + '" placeholder="LTP" onchange="onLTPChange(this)"></td>' +
+      '<td style="text-align:right"><input type="number" step="0.01" class="' + dcCls + '" data-sym="' + esc(s.sym) + '" value="' + dcVal + '" placeholder="%" onchange="onDCChange(this)"></td>' +
+      '<td style="text-align:right">' + retHtml + '</td>' +
+      '<td class="' + (s.netV>=0?'p':'n') + '" style="text-align:right">' + (s.netV>=0?'+':'') + '₹' + fmtCr(Math.abs(s.netV)) + '</td>' +
+      '<td style="text-align:center">' + s.buyers + '</td>' +
+      '<td style="text-align:center">' + s.sellers + '</td>' +
+      '<td style="text-align:center"><span class="sp ' + cls + '" onclick="setSig(\'' + cls + '\')" title="' + titleText + '">' + label + '</span></td>' +
+      '<td style="min-width:100px">' + flagsHtml + '</td>' +
+    '</tr>';
+  }).join('');
+
+  renderActiveFilters();
+}
+
+function renderActiveFilters(){
+  var bar = document.getElementById('afb');
+  var pills = [];
+  if(ST.aSig !== 'all') pills.push({t:'signal', v:ST.aSig, l:'Signal: ' + ST.aSig});
+  if(ST.aInst !== 'all') pills.push({t:'instType', v:ST.aInst, l:'Type: ' + ST.aInst});
+  if(ST.aSec !== 'all') pills.push({t:'sector', v:ST.aSec, l:'Sector: ' + ST.aSec});
+  if(ST.aFlag !== 'all'){
+    var m = FLAG_META[ST.aFlag];
+    pills.push({t:'flag', v:ST.aFlag, l:(m ? m.i + ' ' + m.l : ST.aFlag)});
+  }
+  if(ST.aSrch) pills.push({t:'search', v:ST.aSrch, l:'Search: "' + ST.aSrch + '"'});
+
+  if(!pills.length){ bar.classList.add('em'); bar.innerHTML = ''; return; }
+  bar.classList.remove('em');
+  bar.innerHTML = '<span class="afl">Active Filters (' + pills.length + '):</span>' +
+    pills.map(function(p){
+      return '<span class="afp" data-t="' + p.t + '" data-v="' + esc(p.v) + '">' + esc(p.l) + ' <span class="rm" onclick="removeFilter(this)">×</span></span>';
+    }).join('') +
+    '<button class="clr" onclick="clearAll()">✕ Clear All</button>';
+}
+
+function removeFilter(el){
+  var pill = el.closest('.afp');
+  var t = pill.dataset.t, v = pill.dataset.v;
+  if(t === 'signal') setSig('all');
+  else if(t === 'instType'){ ST.aInst = 'all'; document.getElementById('fInst').value = 'all'; renderStocks(); }
+  else if(t === 'sector'){
+    ST.aSec = 'all';
+    document.getElementById('fSec').value = 'all';
+    renderStocks();
+  }
+  else if(t === 'flag'){
+    ST.aFlag = 'all';
+    document.getElementById('fFl').value = 'all';
+    renderStocks();
+  }
+  else if(t === 'search'){ ST.aSrch = ''; document.getElementById('ss').value = ''; renderStocks(); }
+}
+
+function clearAll(){
+  ST.aSig = 'all'; ST.aCon = 'all'; ST.aInst = 'all'; ST.aSrch = ''; ST.aSec = 'all'; ST.aFlag = 'all';
+  document.getElementById('ss').value = '';
+  document.getElementById('fInst').value = 'all';
+  document.getElementById('fSec').value = 'all';
+  document.getElementById('fSig2').value = 'all';
+  document.getElementById('fFl').value = 'all';
+  renderStocks();
+}
+
+function setSig(s){ ST.aSig = s; var el = document.getElementById('fSig2'); if(el) el.value = s; renderStocks(); }
+
+function toggleWLUI(sym){
+  toggleWL(sym);
+  updateConsensusKPIs();
+}
+
+function onLTPChange(inp){
+  var sym = inp.dataset.sym;
+  var val = parseFloat(inp.value) || 0;
+  setLTP(sym, val);
+  var stk = ST.stocks.find(function(x){ return x.sym === sym; });
+  if(stk){
+    stk.ltp = val;
+    stk.retPct = (val > 0 && stk.vwap > 0) ? ((val - stk.vwap) / stk.vwap) * 100 : null;
+    stk.buyPnlAbs = (val > 0 && stk.vwap > 0 && stk.buyQty > 0) ? ((val - stk.vwap) * stk.buyQty) : null;
+    stk.sellPnlAbs = (val > 0 && stk.sellVwap > 0 && stk.sellQty > 0) ? ((stk.sellVwap - val) * stk.sellQty) : null;
+    stk.netPnlAbs = (stk.buyPnlAbs !== null || stk.sellPnlAbs !== null) ? ((stk.buyPnlAbs || 0) + (stk.sellPnlAbs || 0)) : null;
+  }
+  var ins = ST.insights.find(function(x){ return x.sym === sym; });
+  if(ins){
+    ins.ltp = val;
+    ins.retPct = stk.retPct;
+    ins.buyPnlAbs = stk.buyPnlAbs;
+    ins.sellPnlAbs = stk.sellPnlAbs;
+    ins.netPnlAbs = stk.netPnlAbs;
+  }
+  renderStocks(); renderFrontPage();
+}
+function onDCChange(inp){
+  var sym = inp.dataset.sym;
+  var raw = inp.value.trim();
+  if(raw === '') setDC(sym, null);
+  else { var val = parseFloat(raw); if(!isNaN(val)) setDC(sym, val); }
+  buildStocks(); buildInsights(); render();
+}
+
+function renderClients(){
+  var q = document.getElementById('sc').value.toLowerCase();
+  var type = document.getElementById('fcT').value;
+  var sortBy = document.getElementById('sCli').value;
+  var tbody = document.querySelector('#cliT tbody');
+
+  var list = ST.clients.filter(function(c){
+    if(type !== 'all' && c.type !== type) return false;
+    if(q && c.cli.toLowerCase().indexOf(q) < 0) return false;
+    return true;
+  });
+  list.sort(function(a, b){
+    if(sortBy === 'buyValue') return b.buyV - a.buyV;
+    if(sortBy === 'netValue') return b.netV - a.netV;
+    if(sortBy === 'dealCount') return b.dealCount - a.dealCount;
+    if(sortBy === 'stockCount') return b.stockCount - a.stockCount;
+    return 0;
+  });
+  var maxBuy = Math.max.apply(null, [1].concat(list.map(function(c){ return c.buyV; })));
+
+  if(!list.length){ tbody.innerHTML = '<tr><td colspan="9" class="em">No institutions match.</td></tr>'; return; }
+
+  tbody.innerHTML = list.map(function(c, i){
+    var rankClass = i === 0 ? 't1' : i === 1 ? 't2' : i === 2 ? 't3' : '';
+    var pct = Math.min(100, (c.buyV / maxBuy) * 100);
+    var netSign = c.netV >= 0 ? '+' : '';
+    return '<tr style="cursor:pointer" onclick="openClient(\'' + esc(c.cli) + '\')">' +
+      '<td><span class="lbr ' + rankClass + '">' + (i+1) + '</span></td>' +
+      '<td><span class="lbc">' + esc(c.cli) + '</span></td>' +
+      '<td style="text-align:center"><span class="tag ' + c.type.toLowerCase() + '">' + c.label + '</span></td>' +
+      '<td style="text-align:right" class="p">₹' + fmtCr(c.buyV) + '</td>' +
+      '<td style="text-align:right" class="n">₹' + fmtCr(c.sellV) + '</td>' +
+      '<td style="text-align:right" class="' + (c.netV>=0?'p':'n') + '">' + netSign + '₹' + fmtCr(Math.abs(c.netV)) + '</td>' +
+      '<td style="text-align:center">' + c.stockCount + '</td>' +
+      '<td style="text-align:center">' + c.dealCount + '</td>' +
+      '<td><div class="lbb"><div class="lbf" style="width:' + pct + '%"></div></div></td>' +
+    '</tr>';
+  }).join('');
+}
+
+function renderDeals(){
+  var q = document.getElementById('sd').value.toLowerCase();
+  var side = document.getElementById('fSide').value;
+  var sec = document.getElementById('fSecD').value;
+  var fromV = document.getElementById('dF').value;
+  var toV = document.getElementById('dT').value;
+  var from = fromV ? new Date(fromV) : null;
+  var to = toV ? new Date(toV + 'T23:59:59') : null;
+
+  var list = ST.inst.filter(function(r){
+    if(side !== 'all' && r.side !== side) return false;
+    if(sec !== 'all'){ var stk = ST.stocks.find(function(s){ return s.sym === r.sym; }); if(!stk || stk.sector !== sec) return false; }
+    if(q && r.sym.toLowerCase().indexOf(q) < 0 && r.cli.toLowerCase().indexOf(q) < 0) return false;
+    if(from && r.dt && r.dt < from) return false;
+    if(to && r.dt && r.dt > to) return false;
+    return true;
+  }).sort(function(a, b){
+    if(a.dt && b.dt) return b.dt - a.dt;
+    return b.val - a.val;
+  });
+
+  var tbody = document.querySelector('#delT tbody');
+  tbody.innerHTML = list.slice(0,500).map(function(r){
+    var stk = ST.stocks.find(function(s){ return s.sym === r.sym; });
+    var s = stk ? stk.sector : 'Other';
+    return '<tr>' +
+      '<td>' + esc(r.date) + '</td>' +
+      '<td><span class="sym" onclick="openStock(\'' + esc(r.sym) + '\')">' + esc(r.sym) + '</span></td>' +
+      '<td><span class="sect">' + esc(s) + '</span></td>' +
+      '<td><span class="clk" onclick="openClient(\'' + esc(r.cli) + '\')">' + esc(r.cli) + '</span> <span class="tag ' + r.type.toLowerCase() + '">' + r.label + '</span></td>' +
+      '<td>' + (r.side === 'BUY' ? '<span class="p">BUY</span>' : '<span class="n">SELL</span>') + '</td>' +
+      '<td style="text-align:right">' + fmtN(r.qty) + '</td>' +
+      '<td style="text-align:right">₹' + r.price.toFixed(2) + '</td>' +
+      '<td style="text-align:right" class="' + (r.side==='BUY'?'p':'n') + '">₹' + fmtCr(r.val) + '</td>' +
+    '</tr>';
+  }).join('') || '<tr><td colspan="8" class="em">No deals match.</td></tr>';
+}
+
+function renderNoise(){
+  var tbody = document.querySelector('#noiT tbody');
+  tbody.innerHTML = ST.noise.slice(0,200).map(function(r){
+    return '<tr><td class="mu">' + esc(r.sym) + '</td><td>' + esc(r.cli) + '</td><td>' + (r.side === 'BUY' ? '<span class="p">BUY</span>' : '<span class="n">SELL</span>') + '</td><td>' + fmtN(r.qty) + '</td><td>₹' + r.price.toFixed(2) + '</td></tr>';
+  }).join('') || '<tr><td colspan="5" class="em">No noise rows.</td></tr>';
+}
+
+function openStock(sym){
+  var s = ST.stocks.find(function(x){ return x.sym === sym; });
+  if(!s){ alert('No data for ' + sym); return; }
+  var ins = ST.insights.find(function(x){ return x.sym === sym; }) || s;
+
+  var buys = s.rows.filter(function(r){ return r.side === 'BUY'; }).sort(function(a, b){ return (b.dt||0) - (a.dt||0); });
+  var sells = s.rows.filter(function(r){ return r.side === 'SELL'; }).sort(function(a, b){ return (b.dt||0) - (a.dt||0); });
+
+  var isW = WL.has(sym);
+  var wIcon = isW ? '★' : '☆';
+  var wLabel = isW ? 'Watching' : 'Add to Watchlist';
+  var wCls = isW ? 'wb on' : 'wb';
+
+  var sigLabel = ins.signal === 'bull' ? '🟢 BULLISH' : ins.signal === 'bear' ? '🔴 BEARISH' : '🟡 MIXED';
+  if(s.dayChg !== null){
+    if(s.dayChg <= -15) sigLabel = '🚨 ' + sigLabel + ' ⚠️';
+    else if(s.dayChg <= -5) sigLabel = '⚠️ ' + sigLabel;
+    else if(s.dayChg >= 10) sigLabel = sigLabel + ' 🚀';
+  }
+
+  var warn = '';
+  if(s.dayChg !== null){
+    if(s.dayChg <= -15) warn = '<div class="cb c" style="margin-bottom:16px"><span class="bt">🚨 Critical — Sharp Decline</span>Stock fell <strong>' + s.dayChg.toFixed(2) + '%</strong> on the day this institutional buying was recorded.</div>';
+    else if(s.dayChg <= -5) warn = '<div class="cb k" style="margin-bottom:16px"><span class="bt">⚠️ Falling Knife</span>Stock fell <strong>' + s.dayChg.toFixed(2) + '%</strong> on the day institutions bought.</div>';
+    else if(s.dayChg >= 10) warn = '<div class="cb s" style="margin-bottom:16px"><span class="bt">🚀 Sharp Rally</span>Stock rose <strong>+' + s.dayChg.toFixed(2) + '%</strong> on the day institutions bought.</div>';
+  }
+
+  function summarize(rows){
+    var m = new Map();
+    rows.forEach(function(r){
+      if(!m.has(r.cli)) m.set(r.cli, {cli:r.cli, type:r.type, label:r.label, val:0, qty:0, deals:0, fd:r.dt, ld:r.dt});
+      var b = m.get(r.cli);
+      b.val += r.val; b.qty += r.qty; b.deals++;
+      if(r.dt){ if(!b.fd || r.dt < b.fd) b.fd = r.dt; if(!b.ld || r.dt > b.ld) b.ld = r.dt; }
+    });
+    return Array.from(m.values()).sort(function(a, b){ return b.val - a.val; });
+  }
+
+  var bList = summarize(buys);
+  var sList = summarize(sells);
+
+  var flagsHtml = s.flags.map(function(f){
+    var m = FLAG_META[f]; if(!m) return '';
+    var tips = {
+      crash: "Sharp Decline: Stock crashed on the day institutions bought.",
+      knife: "Falling Knife: Stock dropped over 5 percent while institutions bought.",
+      squeeze: "Sharp Rally: Stock surged over 10 percent on the day institutions bought.",
+      repeat: "Repeat Buyer: The same institution bought this stock on 3 or more separate days.",
+      consensus: "Consensus: Broad agreement. 3 or more distinct institutions bought this stock.",
+      aggressive: "Aggressive: Institutions bought on 3 or more different sessions.",
+      chasing: "Chasing: Institutions bought at a higher price than their first purchase.",
+      averaging: "Averaging: Institutions bought at a lower price than their first purchase.",
+      fresh: "Fresh: First institutional activity was within the last 7 days.",
+      cooling: "Cooling: No new buying for over 10 days, and not currently chasing or aggressive.",
+      mixed: "Mixed: 2 or more institutions bought AND 2 or more institutions sold. They are fighting each other.",
+      watchlist: "Watchlist: You have starred this stock."
+    };
+    return '<span class="fl ' + f + '" title="' + tips[f] + '">' + m.i + ' ' + m.l + '</span>';
+  }).join(' ');
+
+  var pnlBlock = '';
+  if(s.ltp > 0 && (s.buyPnlAbs !== null || s.sellPnlAbs !== null)){
+    var buyCls = (s.buyPnlAbs == null) ? 'mu' : (s.buyPnlAbs >= 0 ? 'p' : 'n');
+    var sellCls = (s.sellPnlAbs == null) ? 'mu' : (s.sellPnlAbs >= 0 ? 'p' : 'n');
+    var netCls = (s.netPnlAbs == null) ? 'mu' : (s.netPnlAbs >= 0 ? 'p' : 'n');
+    var buyText = (s.buyPnlAbs == null) ? '—' : fmtCrSigned(s.buyPnlAbs);
+    var sellText = (s.sellPnlAbs == null) ? '—' : fmtCrSigned(s.sellPnlAbs);
+    var netText = (s.netPnlAbs == null) ? '—' : fmtCrSigned(s.netPnlAbs);
+    var retText = (s.retPct == null) ? '—' : (s.retPct >= 0 ? '+' : '') + s.retPct.toFixed(2) + '%';
+    var retCls = (s.retPct == null) ? 'mu' : (s.retPct >= 0 ? 'p' : 'n');
+
+    pnlBlock = '<div style="background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);border-radius:10px;padding:14px;margin-bottom:14px">' +
+      '<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--b);margin-bottom:10px">📊 Institutional P&L vs Current LTP</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px">' +
+        '<div class="met" style="background:var(--p2);padding:10px" title="Current market price you entered."><div class="met-l">LTP</div><div class="met-v">₹' + s.ltp.toFixed(2) + '</div></div>' +
+        '<div class="met" style="background:var(--p2);padding:10px" title="Weighted average price institutions paid."><div class="met-l">Buy VWAP</div><div class="met-v">' + (s.vwap ? '₹' + s.vwap.toFixed(2) : '—') + '</div></div>' +
+        '<div class="met" style="background:var(--p2);padding:10px" title="Weighted average price institutions sold at."><div class="met-l">Sell VWAP</div><div class="met-v">' + (s.sellVwap ? '₹' + s.sellVwap.toFixed(2) : '—') + '</div></div>' +
+        '<div class="met" style="background:var(--p2);padding:10px" title="Percentage return on the buy side."><div class="met-l">Buy Return</div><div class="met-v ' + retCls + '">' + retText + '</div></div>' +
+      '</div>' +
+      '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">' +
+        '<div class="met" style="background:var(--p2);padding:10px" title="Unrealised P&L on shares currently held. Formula: (LTP - Buy VWAP) * Buy Qty."><div class="met-l">Buy-side P&L</div><div class="met-v ' + buyCls + '" style="font-size:14px">' + buyText + '</div><div style="font-size:9px;color:var(--mu);margin-top:2px">(LTP − Buy VWAP) × Buy Qty</div></div>' +
+        '<div class="met" style="background:var(--p2);padding:10px" title="How much better or worse the sell price was compared to the current LTP. Formula: (Sell VWAP - LTP) * Sell Qty."><div class="met-l">Sell-side P&L</div><div class="met-v ' + sellCls + '" style="font-size:14px">' + sellText + '</div><div style="font-size:9px;color:var(--mu);margin-top:2px">(Sell VWAP − LTP) × Sell Qty</div></div>' +
+        '<div class="met" style="background:var(--p2);padding:10px" title="Buy-side + Sell-side combined."><div class="met-l">Net P&L</div><div class="met-v ' + netCls + '" style="font-size:14px">' + netText + '</div><div style="font-size:9px;color:var(--mu);margin-top:2px">Buy + Sell side combined</div></div>' +
+      '</div>' +
+      '<div style="font-size:10px;color:var(--mu);margin-top:10px;line-height:1.6">' +
+        '<strong style="color:var(--tx)">Buy-side</strong> = unrealised profit/loss on shares institutions currently hold. ' +
+        '<strong style="color:var(--tx)">Sell-side</strong> = how much better/worse the sell price was compared to the current price. ' +
+        '<strong style="color:var(--tx)">Net</strong> = the two combined.' +
+      '</div>' +
+    '</div>';
+  }
+
+  var overlay = document.createElement('div');
+  overlay.className = 'ov';
+  var drawer = document.createElement('div');
+  drawer.className = 'dw';
+
+  var html = '<button class="dw-close">✕</button>' +
+    '<h3>' + esc(sym) + ' <span class="sect" style="font-size:11px;padding:3px 8px">' + esc(s.sector) + '</span> <span class="sig ' + ins.signal + '">' + sigLabel + '</span></h3>' +
+    '<div class="sub">' + esc(s.name) + ' · Conviction: <strong style="color:var(--tx)">' + (ins.conviction || 'medium').toUpperCase() + '</strong></div>' +
+    warn +
+    '<button class="' + wCls + '" style="margin-bottom:16px" onclick="toggleWLUI(\'' + esc(sym) + '\');this.classList.toggle(\'on\');this.innerHTML=\'<span class=star-icon>\' + (WL.has(\'' + esc(sym) + '\')?\'★\':\'☆\') + \'</span> \' + (WL.has(\'' + esc(sym) + '\')?\'Watching\':\'Add to Watchlist\');">' +
+      '<span class="star-icon">' + wIcon + '</span> ' + wLabel +
+    '</button>' +
+    '<div class="dw-sum">' +
+      '<div class="met" title="Total value of all institutional buying."><div class="met-l">Inst Buy</div><div class="met-v p">₹' + fmtCr(s.buyV) + '</div></div>' +
+      '<div class="met" title="Total value of all institutional selling."><div class="met-l">Inst Sell</div><div class="met-v n">₹' + fmtCr(s.sellV) + '</div></div>' +
+      '<div class="met" title="Buy Value minus Sell Value."><div class="met-l">Net Flow</div><div class="met-v ' + (s.netV>=0?'p':'n') + '">' + (s.netV>=0?'+':'') + '₹' + fmtCr(Math.abs(s.netV)) + '</div></div>' +
+      '<div class="met" title="Weighted average price paid by institutions."><div class="met-l">Buy VWAP</div><div class="met-v">' + (s.vwap ? '₹' + s.vwap.toFixed(2) : '—') + '</div></div>' +
+    '</div>' +
+    pnlBlock +
+    (s.buyers === 0 && s.sellVwap > 0 ? '<div class="met" style="background:var(--p2);padding:12px;text-align:center;border-radius:8px;margin-bottom:12px;border:1px solid var(--bd)"><div class="met-l">Sell-Side VWAP</div><div class="met-v sell-vwap" style="font-size:18px">₹' + s.sellVwap.toFixed(2) + '</div><div style="font-size:10px;color:var(--mu);margin-top:4px;font-style:italic">This stock has no institutional buyers — only sells. Buy VWAP cannot be calculated.</div></div>' : '') +
+    (s.dayChg !== null ? '<div class="met" style="background:var(--p2);padding:12px;text-align:center;border-radius:8px;margin-bottom:12px"><div class="met-l">Day Change</div><div class="met-v ' + (s.dayChg>=0?'p':'n') + '" style="font-size:20px">' + (s.dayChg>=0?'+':'') + s.dayChg.toFixed(2) + '%</div></div>' : '') +
+    (flagsHtml ? '<div style="margin-bottom:12px">' + flagsHtml + '</div>' : '') +
+    '<div class="ctl" style="margin-top:12px">' +
+      '<span>First Buy: <strong>' + (s.fBuyD ? fmtD(s.fBuyD) : '<span class="mu">no buys</span>') + '</strong></span>' +
+      '<span>Last Buy: <strong>' + (s.lBuyD ? fmtD(s.lBuyD) : '<span class="mu">—</span>') + '</strong></span>' +
+      '<span>First Sell: <strong>' + (s.fSellD ? fmtD(s.fSellD) : '<span class="mu">—</span>') + '</strong></span>' +
+      '<span>Last Sell: <strong>' + (s.lSellD ? fmtD(s.lSellD) : '<span class="mu">—</span>') + '</strong></span>' +
+      '<span>Days Held: <strong>' + s.daysHeld + '</strong></span>' +
+      '<span>Accum Days: <strong>' + s.accumDays + '</strong></span>' +
+    '</div>' +
+    '<h4>🟢 Buyers <span class="bc">' + bList.length + '</span></h4>';
+
+  if(bList.length){
+    html += '<table><thead><tr><th>Institution</th><th>Type</th><th style="text-align:right">Total Value</th><th style="text-align:right">Qty</th><th style="text-align:center">Deals</th><th>First Buy</th><th>Last Buy</th></tr></thead><tbody>' +
+      bList.map(function(b){
+        return '<tr><td><span class="clk" onclick="openClient(\'' + esc(b.cli) + '\')">' + esc(b.cli) + '</span></td><td><span class="tag ' + b.type.toLowerCase() + '">' + b.label + '</span></td><td style="text-align:right" class="p">₹' + fmtCr(b.val) + '</td><td style="text-align:right">' + fmtN(b.qty) + '</td><td style="text-align:center">' + b.deals + '</td><td>' + (b.fd ? fmtD(b.fd) : '—') + '</td><td>' + (b.ld ? fmtD(b.ld) : '—') + '</td></tr>';
+      }).join('') + '</tbody></table>';
+  } else { html += '<p class="mu" style="font-size:12px;padding:8px 0">No institutional buyers — this is a sell-only stock.</p>'; }
+
+  if(sList.length){
+    html += '<h4>🔴 Sellers <span class="bc">' + sList.length + '</span></h4><table><thead><tr><th>Institution</th><th>Type</th><th style="text-align:right">Total Value</th><th style="text-align:right">Qty</th><th style="text-align:center">Deals</th><th>First Sell</th><th>Last Sell</th></tr></thead><tbody>' +
+      sList.map(function(b){
+        return '<tr><td><span class="clk" onclick="openClient(\'' + esc(b.cli) + '\')">' + esc(b.cli) + '</span></td><td><span class="tag ' + b.type.toLowerCase() + '">' + b.label + '</span></td><td style="text-align:right" class="n">₹' + fmtCr(b.val) + '</td><td style="text-align:right">' + fmtN(b.qty) + '</td><td style="text-align:center">' + b.deals + '</td><td>' + (b.fd ? fmtD(b.fd) : '—') + '</td><td>' + (b.ld ? fmtD(b.ld) : '—') + '</td></tr>';
+      }).join('') + '</tbody></table>';
+  }
+
+  html += '<h4>📋 Chronological Deals <span class="bc">' + s.rows.length + '</span></h4>' +
+    '<table><thead><tr><th>Date</th><th>Institution</th><th>Side</th><th style="text-align:right">Qty</th><th style="text-align:right">Price</th><th style="text-align:right">Value</th></tr></thead><tbody>' +
+    s.rows.slice().sort(function(a, b){ return (b.dt||0) - (a.dt||0); }).map(function(r){
+      return '<tr><td>' + esc(r.date) + '</td><td><span class="clk" onclick="openClient(\'' + esc(r.cli) + '\')">' + esc(r.cli) + '</span></td><td>' + (r.side === 'BUY' ? '<span class="p">BUY</span>' : '<span class="n">SELL</span>') + '</td><td style="text-align:right">' + fmtN(r.qty) + '</td><td style="text-align:right">₹' + r.price.toFixed(2) + '</td><td style="text-align:right" class="' + (r.side==='BUY'?'p':'n') + '">₹' + fmtCr(r.val) + '</td></tr>';
+    }).join('') + '</tbody></table>';
+
+  drawer.innerHTML = html;
+  document.body.appendChild(overlay);
+  document.body.appendChild(drawer);
+  var close = function(){ overlay.remove(); drawer.remove(); };
+  drawer.querySelector('.dw-close').addEventListener('click', close);
+  overlay.addEventListener('click', close);
+}
+
+function openClient(cliName){
+  var rows = ST.inst.filter(function(r){ return r.cli === cliName; }).sort(function(a, b){ return (a.dt||0) - (b.dt||0); });
+  var totalBuy = rows.filter(function(r){ return r.side === 'BUY'; }).reduce(function(s, r){ return s + r.val; }, 0);
+  var totalSell = rows.filter(function(r){ return r.side === 'SELL'; }).reduce(function(s, r){ return s + r.val; }, 0);
+  var net = totalBuy - totalSell;
+  var uniqueStocks = new Set(rows.map(function(r){ return r.sym; }));
+
+  var overlay = document.createElement('div');
+  overlay.className = 'ov';
+  var drawer = document.createElement('div');
+  drawer.className = 'dw';
+  drawer.style.zIndex = '10000';
+  drawer.innerHTML = '<button class="dw-close">✕</button>' +
+    '<h3>' + esc(cliName) + '</h3>' +
+    '<div class="sub">' + rows.length + ' deals · ' + uniqueStocks.size + ' stocks</div>' +
+    '<div class="dw-sum" style="grid-template-columns:repeat(3,1fr)">' +
+      '<div class="met"><div class="met-l">Total Buy</div><div class="met-v p">₹' + fmtCr(totalBuy) + '</div></div>' +
+      '<div class="met"><div class="met-l">Total Sell</div><div class="met-v n">₹' + fmtCr(totalSell) + '</div></div>' +
+      '<div class="met"><div class="met-l">Net Flow</div><div class="met-v ' + (net>=0?'p':'n') + '">' + (net>=0?'+':'') + '₹' + fmtCr(Math.abs(net)) + '</div></div>' +
+    '</div>' +
+    '<h4>Trade History</h4>' +
+    '<table><thead><tr><th>Date</th><th>Symbol</th><th>Side</th><th style="text-align:right">Qty</th><th style="text-align:right">Price</th><th style="text-align:right">Value</th></tr></thead><tbody>' +
+    rows.map(function(r){
+      return '<tr><td>' + esc(r.date) + '</td><td><span class="sym" onclick="openStock(\'' + esc(r.sym) + '\')">' + esc(r.sym) + '</span></td><td>' + (r.side === 'BUY' ? '<span class="p">BUY</span>' : '<span class="n">SELL</span>') + '</td><td style="text-align:right">' + fmtN(r.qty) + '</td><td style="text-align:right">₹' + r.price.toFixed(2) + '</td><td style="text-align:right" class="' + (r.side==='BUY'?'p':'n') + '">₹' + fmtCr(r.val) + '</td></tr>';
+    }).join('') + '</tbody></table>';
+
+  document.body.appendChild(overlay);
+  document.body.appendChild(drawer);
+  var close = function(){ overlay.remove(); drawer.remove(); };
+  drawer.querySelector('.dw-close').addEventListener('click', close);
+  overlay.addEventListener('click', close);
+}
+
+function applyLTPPaste(){
+  var txt = document.getElementById('ltpT').value.trim();
+  if(!txt){ alert('Nothing to apply.'); return; }
+  var lines = txt.split(/\r?\n/);
+  var applied = 0, skipped = 0;
+  lines.forEach(function(ln){
+    var parts = ln.split(/[,;\t]+/).map(function(x){ return x.trim(); }).filter(Boolean);
+    if(parts.length < 2){ skipped++; return; }
+    var sym = parts[0].toUpperCase();
+    var price = parseFloat(parts[1].replace(/[₹,\s]/g,''));
+    if(!isNaN(price) && price > 0){ setLTP(sym, price); applied++; } else skipped++;
+  });
+  ST.stocks.forEach(function(s){
+    s.ltp = getLTP(s.sym);
+    s.retPct = (s.ltp > 0 && s.vwap > 0) ? ((s.ltp - s.vwap)/s.vwap)*100 : null;
+    s.buyPnlAbs = (s.ltp > 0 && s.vwap > 0 && s.buyQty > 0) ? ((s.ltp - s.vwap) * s.buyQty) : null;
+    s.sellPnlAbs = (s.ltp > 0 && s.sellVwap > 0 && s.sellQty > 0) ? ((s.sellVwap - s.ltp) * s.sellQty) : null;
+    s.netPnlAbs = (s.buyPnlAbs !== null || s.sellPnlAbs !== null) ? ((s.buyPnlAbs || 0) + (s.sellPnlAbs || 0)) : null;
+  });
+  ST.insights.forEach(function(i){
+    var stk = ST.stocks.find(function(x){ return x.sym === i.sym; });
+    i.ltp = getLTP(i.sym);
+    i.retPct = stk ? stk.retPct : null;
+    i.buyPnlAbs = stk ? stk.buyPnlAbs : null;
+    i.sellPnlAbs = stk ? stk.sellPnlAbs : null;
+    i.netPnlAbs = stk ? stk.netPnlAbs : null;
+  });
+  renderStocks(); renderFrontPage();
+  alert('✓ Applied ' + applied + ' LTP.' + (skipped ? ' (' + skipped + ' skipped)' : ''));
+}
+function applyDCPaste(){
+  var txt = document.getElementById('dcT').value.trim();
+  if(!txt){ alert('Nothing to apply.'); return; }
+  var lines = txt.split(/\r?\n/);
+  var applied = 0, skipped = 0;
+  lines.forEach(function(ln){
+    var parts = ln.split(/[,;\t]+/).map(function(x){ return x.trim(); }).filter(Boolean);
+    if(parts.length < 2){ skipped++; return; }
+    var sym = parts[0].toUpperCase();
+    var pct = parseFloat(parts[1].replace(/[%,\s]/g,''));
+    if(!isNaN(pct)){ setDC(sym, pct); applied++; } else skipped++;
+  });
+  buildStocks(); buildInsights(); render();
+  alert('✓ Applied ' + applied + ' day-change values.' + (skipped ? ' (' + skipped + ' skipped)' : ''));
+}
+function clearLTP(){
+  if(!confirm('Clear all LTP?')) return;
+  LTP = {}; try{ localStorage.setItem(LTP_KEY, JSON.stringify(LTP)); }catch(e){}
+  ST.stocks.forEach(function(s){ s.ltp = 0; s.retPct = null; s.buyPnlAbs = null; s.sellPnlAbs = null; s.netPnlAbs = null; });
+  ST.insights.forEach(function(i){ i.ltp = 0; i.retPct = null; i.buyPnlAbs = null; i.sellPnlAbs = null; i.netPnlAbs = null; });
+  renderStocks(); renderFrontPage();
+}
+function clearDC(){ if(!confirm('Clear all Day %?')) return; DC = {}; try{ localStorage.setItem(DC_KEY, JSON.stringify(DC)); }catch(e){} buildStocks(); buildInsights(); render(); }
+function exportViewCSV(){
+  var list = sortStocks(getFilteredStocks());
+  if(!list.length){ alert('Nothing to export.'); return; }
+  var cols = ['Symbol','Name','Sector','First Buy','First Sell','Days Held','Accum Days','Buy VWAP','Sell VWAP','LTP','Day %','Return %','Buy PnL (Rs)','Sell PnL (Rs)','Net PnL (Rs)','Net Flow','Inst Buy','Inst Sell','Buyers','Sellers','Signal','Conviction','Flags','Buyer Names','Seller Names'];
+  var rows = [cols.join(',')];
+  list.forEach(function(s){
+    var ins = ST.insights.find(function(x){ return x.sym === s.sym; });
+    var sig = s.netV > 0 ? 'BULLISH' : s.netV < 0 ? 'BEARISH' : 'MIXED';
+    var flags = s.flags.map(function(f){ return FLAG_META[f] ? FLAG_META[f].l : f; }).join(' | ');
+    rows.push([csvCell(s.sym), csvCell(s.name), csvCell(s.sector), s.fBuyD ? fmtD(s.fBuyD) : '', s.fSellD ? fmtD(s.fSellD) : '', s.daysHeld, s.accumDays, s.vwap ? s.vwap.toFixed(2) : '', s.sellVwap ? s.sellVwap.toFixed(2) : '', s.ltp ? s.ltp.toFixed(2) : '', s.dayChg == null ? '' : s.dayChg.toFixed(2), s.retPct == null ? '' : s.retPct.toFixed(2), s.buyPnlAbs == null ? '' : s.buyPnlAbs.toFixed(0), s.sellPnlAbs == null ? '' : s.sellPnlAbs.toFixed(0), s.netPnlAbs == null ? '' : s.netPnlAbs.toFixed(0), s.netV.toFixed(0), s.buyV.toFixed(0), s.sellV.toFixed(0), s.buyers, s.sellers, sig, ins ? ins.conviction.toUpperCase() : '', csvCell(flags), csvCell(s.buyerList.join(' | ')), csvCell(s.sellerList.join(' | '))].join(','));
+  });
+  var blob = new Blob([rows.join('\n')], {type:'text/csv;charset=utf-8'});
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'bulk-deal-view.csv';
+  a.click();
+}
+function csvCell(v){ var s = String(v == null ? '' : v); if(/[",\n]/.test(s)) return '"' + s.replace(/"/g,'""') + '"'; return s; }
+
+function resetAll(keepLtp){
+  if(!keepLtp){ LTP = {}; try{ localStorage.setItem(LTP_KEY, JSON.stringify(LTP)); }catch(e){} }
+  DC = {}; try{ localStorage.setItem(DC_KEY, JSON.stringify(DC)); }catch(e){}
+  ST = { all:[], noise:[], inst:[], stocks:[], insights:[], clients:[],
+    aSig:'all', aCon:'all', aInst:'all', aSrch:'', aSec:'all', aFlags:new Set(), aFlag:'all',
+    frontSec:'all',
+    sKey:'netValue', sDir:'desc', fname:'' };
+
+  var tb1 = document.querySelector('#stk tbody'); if(tb1) tb1.innerHTML = '';
+  var tb2 = document.querySelector('#delT tbody'); if(tb2) tb2.innerHTML = '';
+  var tb3 = document.querySelector('#noiT tbody'); if(tb3) tb3.innerHTML = '';
+  var tb4 = document.querySelector('#cliT tbody'); if(tb4) tb4.innerHTML = '';
+  var bl = document.getElementById('bullList'); if(bl) bl.innerHTML = '';
+  var brl = document.getElementById('bearList'); if(brl) brl.innerHTML = '';
+  var sc = document.getElementById('sectorChips'); if(sc) sc.innerHTML = '';
+  var fl = document.getElementById('frontLine'); if(fl) fl.innerHTML = 'Loading…';
+  var ss = document.getElementById('ss'); if(ss) ss.value = '';
+  var si = document.getElementById('si'); if(si) si.value = '';
+  var sd = document.getElementById('sd'); if(sd) sd.value = '';
+  var scc = document.getElementById('sc'); if(scc) scc.value = '';
+  var lt = document.getElementById('ltpT'); if(lt) lt.value = '';
+  var dt = document.getElementById('dcT'); if(dt) dt.value = '';
+  document.getElementById('statsBox').classList.add('hid');
+  document.getElementById('tabsBox').classList.add('hid');
+  document.getElementById('btnNew').classList.add('hid');
+  document.getElementById('fileInfo').classList.add('hid');
+  document.getElementById('fileInfo').textContent = '';
+  document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('on'); });
+  document.querySelectorAll('.pnl').forEach(function(x){ x.classList.remove('on'); });
+  document.querySelector('.tab[data-p="pIns"]').classList.add('on');
+  document.getElementById('pIns').classList.add('on');
+  var k1 = document.getElementById('kpiCommonCliV'); if(k1) k1.textContent = '—';
+  var k2 = document.getElementById('kpiBuyCommonCliV'); if(k2) k2.textContent = '—';
+  var k3 = document.getElementById('kpiCommonDelV'); if(k3) k3.textContent = '—';
+  var k4 = document.getElementById('kpiBuyCommonDelV'); if(k4) k4.textContent = '—';
+  var k5 = document.getElementById('kpiWatchlistV'); if(k5) k5.textContent = '0';
+
+  var uz = document.getElementById('uz');
+  uz.innerHTML = '<h3>📁 Load NSE Bulk Deals CSV</h3>' +
+    '<p>Click the file button below, or drag & drop a CSV into this box</p>' +
+    '<input type="file" id="fi" accept=".csv,.txt,text/csv,text/plain,application/vnd.ms-excel">';
+  bindFI('fi');
+  dlog('Dashboard reset. Ready for new file.', 'i');
+}
+
+function handleNew(){
+  var hasLtp = Object.keys(LTP).length > 0;
+  var hasWL = WL.size > 0;
+  var ov = document.createElement('div');
+  ov.className = 'ov';
+  ov.innerHTML = '<div class="md"><h3>🔄 Load New Data</h3>' +
+    '<p>Clear current dataset to upload a fresh CSV.</p>' +
+    (hasLtp ? '<p><strong style="color:var(--a)">LTP (' + Object.keys(LTP).length + ' symbols) preserved.</strong></p>' : '') +
+    (hasWL ? '<p><strong style="color:var(--a)">Watchlist (' + WL.size + ' symbols) preserved.</strong></p>' : '') +
+    '<p><strong style="color:var(--r)">Day-change values will be cleared.</strong></p>' +
+    '<div class="md-acts"><button id="mCan">Cancel</button><button id="mClr">Clear LTP Too</button><button id="mKeep" class="pri">' + (hasLtp ? 'Keep LTP & Reset' : 'Reset') + '</button></div></div>';
+  document.body.appendChild(ov);
+  ov.querySelector('#mCan').addEventListener('click', function(){ ov.remove(); });
+  ov.querySelector('#mClr').addEventListener('click', function(){ resetAll(false); ov.remove(); });
+  ov.querySelector('#mKeep').addEventListener('click', function(){ resetAll(true); ov.remove(); });
+  ov.addEventListener('click', function(e){ if(e.target === ov) ov.remove(); });
+}
+
+function bindFI(id){
+  var inp = document.getElementById(id);
+  if(!inp){ dlog('Input #' + id + ' not found', 'e'); return; }
+  dlog('Binding change on #' + id, 'i');
+  inp.addEventListener('change', function(e){
+    dlog('✓ Change fired on #' + id, 'o');
+    var files = e.target.files;
+    dlog('Files.length = ' + (files ? files.length : 'null'), 'i');
+    if(!files || files.length === 0){ dlog('No file selected', 'w'); return; }
+    var f = files[0];
+    dlog('File: ' + f.name + ' · ' + f.size + ' bytes · type=' + (f.type || 'unknown'), 'o');
+    if(f.size === 0){ dlog('File is empty', 'e'); alert('File is empty.'); return; }
+    var reader = new FileReader();
+    reader.onerror = function(){ dlog('FileReader error', 'e'); alert('Failed to read file.'); };
+    reader.onload = function(ev){
+      var content = ev.target.result;
+      dlog('Read OK — ' + content.length + ' chars', 'o');
+      dlog('First 100: ' + content.substring(0, 100).replace(/\n/g, ' ').replace(/\r/g, ' ').replace(/\t/g, '|'), 'i');
+      try { processCSV(content, f.name); }
+      catch(err){ dlog('Process error: ' + err.message, 'e'); console.error(err); alert('Error: ' + err.message); }
+    };
+    reader.readAsText(f);
+  });
+}
+
+bindFI('fi');
+
+var uz = document.getElementById('uz');
+uz.addEventListener('dragover', function(e){ e.preventDefault(); uz.classList.add('dg'); });
+uz.addEventListener('dragleave', function(){ uz.classList.remove('dg'); });
+uz.addEventListener('drop', function(e){
+  e.preventDefault(); uz.classList.remove('dg');
+  dlog('File dropped', 'o');
+  var f = e.dataTransfer.files[0];
+  if(!f){ dlog('No file in drop', 'w'); return; }
+  dlog('Dropped: ' + f.name + ' · ' + f.size + ' bytes', 'o');
+  var reader = new FileReader();
+  reader.onerror = function(){ dlog('Read error', 'e'); alert('Failed to read.'); };
+  reader.onload = function(ev){
+    if(ST.all.length > 0) resetAll(true);
+    processCSV(ev.target.result, f.name);
+  };
+  reader.readAsText(f);
+});
+
+document.getElementById('clrLog').addEventListener('click', function(){ document.getElementById('dbgBody').innerHTML = ''; });
+document.getElementById('btnNew').addEventListener('click', handleNew);
+
+document.querySelectorAll('.tab').forEach(function(t){
+  t.addEventListener('click', function(){
+    document.querySelectorAll('.tab').forEach(function(x){ x.classList.remove('on'); });
+    document.querySelectorAll('.pnl').forEach(function(x){ x.classList.remove('on'); });
+    t.classList.add('on');
+    document.getElementById(t.dataset.p).classList.add('on');
+  });
+});
+
+document.querySelectorAll('#stk th.so').forEach(function(th){
+  th.addEventListener('click', function(){
+    var k = th.dataset.sort;
+    if(ST.sKey === k) ST.sDir = ST.sDir === 'asc' ? 'desc' : 'asc';
+    else { ST.sKey = k; ST.sDir = 'desc'; }
+    renderStocks();
+  });
+});
+
+document.getElementById('ss').addEventListener('input', function(e){ ST.aSrch = e.target.value; renderStocks(); });
+document.getElementById('fInst').addEventListener('change', function(e){ ST.aInst = e.target.value; renderStocks(); });
+document.getElementById('fSec').addEventListener('change', function(e){
+  ST.aSec = e.target.value;
+  renderStocks();
+});
+document.getElementById('fSig2').addEventListener('change', function(e){ setSig(e.target.value); });
+document.getElementById('fFl').addEventListener('change', function(e){ ST.aFlag = e.target.value; renderStocks(); });
+document.getElementById('rst').addEventListener('click', clearAll);
+
+document.getElementById('kpiCommonCli').addEventListener('click', function(){ openConsensusModal('contested'); });
+document.getElementById('kpiBuyCommonCli').addEventListener('click', function(){ openConsensusModal('consensus'); });
+document.getElementById('kpiCommonDel').addEventListener('click', function(){ openConsensusModal('contested'); });
+document.getElementById('kpiBuyCommonDel').addEventListener('click', function(){ openConsensusModal('consensus'); });
+document.getElementById('kpiWatchlist').addEventListener('click', openWatchlistModal);
+
+document.getElementById('sBCard').addEventListener('click', function(){ openInstListModal('buys'); });
+document.getElementById('sSCard').addEventListener('click', function(){ openInstListModal('sells'); });
+
+document.getElementById('a1').addEventListener('click', applyLTPPaste);
+document.getElementById('a2').addEventListener('click', clearLTP);
+document.getElementById('a3').addEventListener('click', applyDCPaste);
+document.getElementById('a4').addEventListener('click', clearDC);
+document.getElementById('a5').addEventListener('click', exportViewCSV);
+
+document.getElementById('sc').addEventListener('input', renderClients);
+document.getElementById('fcT').addEventListener('change', renderClients);
+document.getElementById('sCli').addEventListener('change', renderClients);
+
+document.getElementById('sd').addEventListener('input', renderDeals);
+document.getElementById('fSide').addEventListener('change', renderDeals);
+document.getElementById('fSecD').addEventListener('change', renderDeals);
+document.getElementById('dF').addEventListener('change', renderDeals);
+document.getElementById('dT').addEventListener('change', renderDeals);
+document.getElementById('clrD').addEventListener('click', function(){
+  document.getElementById('dF').value = '';
+  document.getElementById('dT').value = '';
+  renderDeals();
+});
+
+var _fab = document.createElement('button');
+_fab.className = 'dbg-fab';
+_fab.innerHTML = '🔍';
+_fab.title = 'Toggle Debug Log';
+_fab.addEventListener('click', function(){
+  document.getElementById('dbgPanel').classList.toggle('show');
+});
+document.body.appendChild(_fab);
+
+window.__mainRan = true;
+dlog('✓ All event handlers bound. Ready to receive CSV.', 'o');
+</script>
+
+<script>
+setTimeout(function(){
+  if(!window.__mainRan){
+    dlog('❌ Main script did not complete. There is a syntax error somewhere in the second script block.', 'e');
+  }
+}, 500);
+</script>
+
+</body>
+</html>
